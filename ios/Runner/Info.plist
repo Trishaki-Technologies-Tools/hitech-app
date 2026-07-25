@@ -1,7 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
+<dict><!-- Camera -->
+<key>NSCameraUsageDescription</key>
+<string>Hitech Pragati uses the camera to scan QR codes, capture attendance photos, and upload images for attendance verification.</string>
+
+<!-- Photo Library -->
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Hitech Pragati needs access to your photo library so you can select and upload images for attendance records and profile updates.</string>
+
+<!-- Location While Using App -->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Hitech Pragati uses your location to verify attendance and ensure employees or students are present at the authorized location during check-in and check-out.</string>
+
+<!-- Background Location -->
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Hitech Pragati may access your location in the background only when required to support authorized attendance tracking features enabled by your organization.</string>
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
