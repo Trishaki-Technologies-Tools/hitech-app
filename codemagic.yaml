@@ -3,7 +3,7 @@ workflows:
     name: iOS TestFlight
 
     integrations:
-      app_store_connect: Apple TestFlight
+      app_store_connect: trishaki
 
     environment:
       flutter: stable
