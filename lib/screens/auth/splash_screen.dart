@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
 import 'login_screen.dart';
@@ -13,11 +14,43 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
   @override
   void initState() {
     super.initState();
+    
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
+
+    // Elastic pop for the logo
+    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.7, curve: Curves.elasticOut)),
+    );
+
+    // Fade and slide for the text
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0.4, 1.0, curve: Curves.easeIn)),
+    );
+    
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.4), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0.4, 1.0, curve: Curves.easeOutCubic)),
+    );
+
+    _controller.forward();
     _checkAuth();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   void _checkAuth() async {
@@ -51,48 +84,22 @@ class _SplashScreenState extends State<SplashScreen> {
         );
         return;
       }
-      // Verify with server if we are outside work hours (Disabled to keep users logged in outside working hours)
-      /*
+      // Fetch office hours to use for timer logic later
       try {
         final response = await apiService.get('settings.php');
-          if (response['status'] == 'success') {
-            final settings = response['settings'];
-            if (settings != null) {
-              final loginStr = settings['login_time'] as String? ?? '09:00';
-              final logoutStr = settings['logout_time'] as String? ?? '18:00';
-
-              final now = DateTime.now();
-              final currentStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-
-              bool withinHours = false;
-              if (loginStr.compareTo(logoutStr) <= 0) {
-                withinHours = (currentStr.compareTo(loginStr) >= 0 && currentStr.compareTo(logoutStr) <= 0);
-              } else {
-                withinHours = (currentStr.compareTo(loginStr) >= 0 || currentStr.compareTo(logoutStr) <= 0);
-              }
-
-              if (!withinHours) {
-                await auth.logout(isForced: true);
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Access blocked: outside allowed working hours ($loginStr - $logoutStr)'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                );
-                return;
-              }
-            }
+        if (response['status'] == 'success') {
+          final settings = response['settings'];
+          if (settings != null) {
+            final loginStr = settings['login_time'] as String? ?? '09:00';
+            final logoutStr = settings['logout_time'] as String? ?? '18:00';
+            
+            await const FlutterSecureStorage().write(key: 'office_login_time', value: loginStr);
+            await const FlutterSecureStorage().write(key: 'office_logout_time', value: logoutStr);
           }
-        } catch (e) {
-          debugPrint('Startup timing verification skipped (offline or network error): $e');
         }
-      */
-
+      } catch (e) {
+        // Silently ignore if offline
+      }
       _navigateBasedOnRole(auth.user!.role);
     } else {
       Navigator.pushReplacement(
@@ -128,11 +135,11 @@ class _SplashScreenState extends State<SplashScreen> {
         width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF3F51B5), // Deep indigo
-              Color(0xFF283593), // Darker midnight indigo for premium depth
+              Color(0xFF3F51B5), // Lighter Slate Blue at top
+              Color(0xFF1A237E), // Deep primary Slate Blue at bottom
             ],
           ),
         ),
@@ -141,74 +148,82 @@ class _SplashScreenState extends State<SplashScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(flex: 3),
-              // App Icon / Logo with slight glowing backdrop
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.12),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+              // App Icon / Logo with elastic pop animation
+              ScaleTransition(
+                scale: _scaleAnimation,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.12),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/icon/logo.png',
+                      fit: BoxFit.contain,
                     ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(12),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    'assets/icon/logo.png',
-                    fit: BoxFit.contain,
                   ),
                 ),
               ),
               const SizedBox(height: 32),
               
-              // App Name
-              const Text(
-                'Hitech Pragati',
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              const SizedBox(height: 14),
-              
-              // Slogan / Quote Symmetrical Slogan Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                child: Text(
-                  'Driven by Goals. Powered by Performance.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14.5,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.white.withOpacity(0.85),
-                    letterSpacing: 0.5,
-                    height: 1.4,
+              // Animated Text Block
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Column(
+                    children: [
+                      // App Name
+                      const Text(
+                        'Hitech Pragati',
+                        style: TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      
+                      // Slogan / Quote Symmetrical Slogan Bar
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                        child: Text(
+                          'Driven by Goals. Powered by Performance.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14.5,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.white.withOpacity(0.85),
+                            letterSpacing: 0.5,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
               
               const Spacer(flex: 2),
               
-              // Custom styled material spinner and loading cue
-              const CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 3,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Initializing assistant...',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
-                  fontSize: 12,
-                  letterSpacing: 1.2,
+              // Animated Loader
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: const CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 3,
                 ),
               ),
               const Spacer(flex: 1),

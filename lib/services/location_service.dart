@@ -28,7 +28,7 @@ class LocationService {
     return await Geolocator.getCurrentPosition();
   }
 
-  Future<void> markAttendance(String action) async {
+  Future<void> markAttendance(String action, {String? reason}) async {
     Position? position;
     try {
       position = await Geolocator.getCurrentPosition(
@@ -52,8 +52,17 @@ class LocationService {
       headingAccuracy: 0
     );
 
+    if (action == 'logout') {
+      try {
+        await _apiService.post('tracking.php?type=location', {'action': 'end_trip'});
+      } catch (e) {
+        print('Error ending trip: $e');
+      }
+    }
+
     await _apiService.post('mark_attendance.php', {
       'action': action, // 'login' or 'logout'
+      'logout_reason': reason,
       'latitude': position.latitude,
       'longitude': position.longitude,
     });

@@ -72,9 +72,66 @@ class BackgroundLocationService {
       const storage = FlutterSecureStorage();
       Timer? trackingTimer;
       bool userWantsToBeOnline = true;
+      StreamSubscription<Position>? positionStream;
+      List<Map<String, dynamic>> locationBatch = [];
+
+      void startLocationStream() async {
+        if (positionStream != null) return;
+        
+        // Instant sync on going online so the Web Dashboard updates immediately
+        try {
+          Position initialPos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+          await apiService.post('tracking.php?type=location', {
+            'action': 'sync',
+            'locations': [{
+              'lat': initialPos.latitude,
+              'lng': initialPos.longitude,
+              'accuracy': initialPos.accuracy,
+              'speed': initialPos.speed,
+              'bearing': initialPos.heading,
+              'timestamp': initialPos.timestamp != null ? initialPos.timestamp!.toIso8601String() : DateTime.now().toIso8601String(),
+            }],
+          });
+        } catch (_) {}
+
+        positionStream = Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 20, // Only trigger if moved 20 meters
+          ),
+        ).listen((Position position) async {
+          if (position.accuracy > 300) return; // Ignore wildly inaccurate GPS data
+
+          locationBatch.add({
+            'lat': position.latitude,
+            'lng': position.longitude,
+            'accuracy': position.accuracy,
+            'speed': position.speed,
+            'bearing': position.heading,
+            'timestamp': position.timestamp != null ? position.timestamp!.toIso8601String() : DateTime.now().toIso8601String(),
+          });
+
+          // Sync in batches of 1 (real-time enough due to distance filter) or more if offline
+          try {
+            await apiService.post('tracking.php?type=location', {
+              'action': 'sync',
+              'locations': locationBatch,
+            });
+            locationBatch.clear(); // Clear on success
+          } catch (e) {
+            // Keep in batch if network fails
+          }
+        });
+      }
+
+      void stopLocationStream() {
+        positionStream?.cancel();
+        positionStream = null;
+      }
 
       service.on('stopService').listen((event) {
         trackingTimer?.cancel();
+        stopLocationStream();
         service.stopSelf();
       });
 
@@ -95,7 +152,32 @@ class BackgroundLocationService {
           bool isActuallyTracking = userWantsToBeOnline && locationEnabled && hasPermission;
 
           if (!isActuallyTracking) {
+            stopLocationStream();
+            
             // User is offline (either because they clicked OFFLINE, or because GPS/permission is off)
+            
+            String loginStr = await storage.read(key: 'office_login_time') ?? '09:00';
+            String logoutStr = await storage.read(key: 'office_logout_time') ?? '18:00';
+            final currentStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+            
+            bool withinHours = false;
+            if (loginStr.compareTo(logoutStr) <= 0) {
+              withinHours = (currentStr.compareTo(loginStr) >= 0 && currentStr.compareTo(logoutStr) <= 0);
+            } else {
+              withinHours = (currentStr.compareTo(loginStr) >= 0 || currentStr.compareTo(logoutStr) <= 0);
+            }
+
+            if (!withinHours) {
+              // Outside working hours -> no forced timer, no OTP locks
+              await storage.delete(key: 'break_start_time');
+              service.invoke('locationOff', {
+                'minutesOff': 0,
+                'remaining': 0,
+                'hideTimer': true
+              });
+              return;
+            }
+
             String? totalSecStr = await storage.read(key: 'total_break_seconds');
             String? startStr = await storage.read(key: 'break_start_time');
             
@@ -113,15 +195,18 @@ class BackgroundLocationService {
 
             service.invoke('locationOff', {
               'minutesOff': totalMinutes,
-              'remaining': ((15 - totalSeconds) > 0 ? (15 - totalSeconds) : 0)
+              'remaining': ((15 - totalSeconds) > 0 ? (15 - totalSeconds) : 0),
+              'hideTimer': false
             });
 
             if (totalSeconds >= 15) {
               final logoutTime = now.subtract(Duration(seconds: totalSeconds));
               final formattedTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(logoutTime);
+              await apiService.post('tracking.php?type=location', {'action': 'end_trip'});
               
               await apiService.post('mark_attendance.php', {
                 'action': 'logout',
+                'logout_reason': 'Offline Timer',
                 'latitude': 0,
                 'longitude': 0,
                 'logout_time': formattedTime,
@@ -142,17 +227,7 @@ class BackgroundLocationService {
             // Online and successfully tracking - reset break state
             await storage.write(key: 'total_break_seconds', value: '0');
             await storage.delete(key: 'break_start_time');
-          }
-
-          if (isActuallyTracking) {
-            Position position = await Geolocator.getCurrentPosition(
-              desiredAccuracy: LocationAccuracy.medium,
-              timeLimit: const Duration(seconds: 15),
-            );
-            await apiService.post('update_location.php', {
-              'latitude': position.latitude,
-              'longitude': position.longitude,
-            });
+            startLocationStream(); // Ensure stream is running
           }
         } catch (e) {
           // Silent catch
@@ -160,6 +235,7 @@ class BackgroundLocationService {
       });
     } catch (e) {
       // Global onStart fail safe
+
     }
   }
 }

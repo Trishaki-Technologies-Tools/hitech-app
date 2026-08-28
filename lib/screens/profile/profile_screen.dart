@@ -484,9 +484,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildRowItem(
                         icon: Icons.manage_accounts_outlined,
                         label: 'Assigned Manager',
-                        value: (user?.managerId == null || user!.managerId!.isEmpty)
+                        value: (user?.managerName == null || user!.managerName!.isEmpty)
                             ? 'Admin Manager'
-                            : 'Manager (ID: ${user.managerId})',
+                            : user.managerName!,
                         isEditable: false,
                       ),
                     ],
@@ -502,11 +502,71 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 height: 56,
                 child: ElevatedButton.icon(
                   onPressed: () async {
-                    await auth.logout();
-                    if (context.mounted) {
-                      Navigator.of(context, rootNavigator: true).pushReplacement(
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    final shouldLogout = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        title: const Row(
+                          children: [
+                            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+                            SizedBox(width: 10),
+                            Text('Warning', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        content: const Text(
+                          'If you logout, you will be required to enter a Manager OTP when logging back in. Avoid logging out unless absolutely necessary.\n\nAre you sure you want to logout?',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Logout'),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (shouldLogout == true) {
+                      if (!context.mounted) return;
+                      // Show loading dialog
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => const Center(
+                          child: Card(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+                            child: Padding(
+                              padding: EdgeInsets.all(24.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircularProgressIndicator(color: Color(0xFF3F51B5)),
+                                  SizedBox(height: 16),
+                                  Text('Logging out...', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF3F51B5))),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       );
+
+                      await auth.logout();
+
+                      if (context.mounted) {
+                        Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const LoginScreen()),
+                          (route) => false,
+                        );
+                      }
                     }
                   },
                   icon: const Icon(Icons.logout_rounded, size: 20),

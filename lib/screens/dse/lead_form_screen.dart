@@ -101,7 +101,7 @@ class _LeadFormScreenState extends State<LeadFormScreen> {
   final _enquiryProviderPhoneController = TextEditingController();
   
   // Selected dropdown options
-  String? _enquirySelectedState;
+  String? _enquirySelectedState = 'Karnataka';
   String? _enquirySelectedCity;
   String? _enquirySelectedSegment;
   String? _enquirySelectedBrand;
@@ -118,37 +118,7 @@ class _LeadFormScreenState extends State<LeadFormScreen> {
 
   // Complete India States and Cities Database
   final Map<String, List<String>> _indiaStatesAndCities = const {
-    'Andhra Pradesh': ['Visakhapatnam', 'Vijayawada', 'Guntur', 'Nellore', 'Kurnool', 'Rajahmundry', 'Tirupati', 'Kakinada', 'Anantapur', 'Eluru', 'Other'],
-    'Arunachal Pradesh': ['Itanagar', 'Naharlagun', 'Pasighat', 'Namsai', 'Other'],
-    'Assam': ['Guwahati', 'Silchar', 'Dibrugarh', 'Jorhat', 'Nagaon', 'Tinsukia', 'Other'],
-    'Bihar': ['Patna', 'Gaya', 'Bhagalpur', 'Muzaffarpur', 'Purnia', 'Darbhanga', 'Arrah', 'Begusarai', 'Other'],
-    'Chhattisgarh': ['Raipur', 'Bhilai', 'Bilaspur', 'Korba', 'Rajnandgaon', 'Other'],
-    'Delhi': ['New Delhi', 'Dwarka', 'Rohini', 'Vasant Kunj', 'Shahdara', 'Noida-NCR', 'Other'],
-    'Goa': ['Panaji', 'Margao', 'Vasco da Gama', 'Mapusa', 'Ponda', 'Other'],
-    'Gujarat': ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar', 'Jamnagar', 'Gandhinagar', 'Junagadh', 'Other'],
-    'Haryana': ['Faridabad', 'Gurugram', 'Panipat', 'Ambala', 'Yamunanagar', 'Rohtak', 'Hisar', 'Karnal', 'Other'],
-    'Himachal Pradesh': ['Shimla', 'Dharamshala', 'Solan', 'Mandi', 'Una', 'Other'],
-    'Jammu and Kashmir': ['Srinagar', 'Jammu', 'Anantnag', 'Baramulla', 'Kathua', 'Other'],
-    'Jharkhand': ['Jamshedpur', 'Dhanbad', 'Ranchi', 'Bokaro Steel City', 'Deoghar', 'Other'],
-    'Karnataka': ['Bengaluru', 'Hubballi-Dharwad', 'Mysuru', 'Kalaburagi', 'Belagavi', 'Mangaluru', 'Davanagere', 'Ballari', 'Other'],
-    'Kerala': ['Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Kollam', 'Thrissur', 'Alappuzha', 'Palakkad', 'Other'],
-    'Madhya Pradesh': ['Indore', 'Bhopal', 'Jabalpur', 'Gwalior', 'Ujjain', 'Sagar', 'Dewas', 'Satna', 'Ratlam', 'Rewa', 'Other'],
-    'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane', 'Pimpri-Chinchwad', 'Nashik', 'Kalyan-Dombivli', 'Vasai-Virar', 'Aurangabad', 'Navi Mumbai', 'Other'],
-    'Manipur': ['Imphal', 'Thoubal', 'Kakching', 'Other'],
-    'Meghalaya': ['Shillong', 'Tura', 'Nongpoh', 'Other'],
-    'Mizoram': ['Aizawl', 'Lunglei', 'Champhai', 'Other'],
-    'Nagaland': ['Dimapur', 'Kohima', 'Mokokchung', 'Other'],
-    'Odisha': ['Bhubaneswar', 'Cuttack', 'Rourkela', 'Sambalpur', 'Puri', 'Balasore', 'Other'],
-    'Punjab': ['Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala', 'Bathinda', 'Mohali', 'Hoshiarpur', 'Pathankot', 'Other'],
-    'Rajasthan': ['Jaipur', 'Jodhpur', 'Kota', 'Bikaner', 'Ajmer', 'Udaipur', 'Bhilwara', 'Alwar', 'Sikar', 'Other'],
-    'Sikkim': ['Gangtok', 'Namchi', 'Geyzing', 'Other'],
-    'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem', 'Tiruppur', 'Erode', 'Vellore', 'Thoothukudi', 'Other'],
-    'Telangana': ['Hyderabad', 'Warangal', 'Nizamabad', 'Khammam', 'Karimnagar', 'Ramagundam', 'Other'],
-    'Tripura': ['Agartala', 'Dharmanagar', 'Udaipur', 'Other'],
-    'Uttar Pradesh': ['Meerut', 'Lucknow', 'Kanpur', 'Noida', 'Ghaziabad', 'Varanasi', 'Agra', 'Prayagraj', 'Bareilly', 'Aligarh', 'Moradabad', 'Gorakhpur', 'Other'],
-    'Uttarakhand': ['Dehradun', 'Haridwar', 'Haldwani', 'Roorkee', 'Kashipur', 'Other'],
-    'West Bengal': ['Kolkata', 'Howrah', 'Siliguri', 'Asansol', 'Durgapur', 'Bardhaman', 'Malda', 'Other'],
-    'Other Territory': ['Other City'],
+    'Karnataka': ['Belagavi', 'Bagalkot'],
   };
 
   void _showSearchablePicker({
@@ -854,6 +824,7 @@ class _LeadFormScreenState extends State<LeadFormScreen> {
     final formattedRequirement = """
 Quotation No: $_quotationNo
 Date: $_dateStr
+Follow Up Date: $_dateStr
 Address: ${address.isEmpty ? 'Not Provided' : address}
 Model Destribution: $vehicle
 ${alternatePhone.isNotEmpty ? 'Alternate Phone: $alternatePhone\n' : ''}--------------------------------------
@@ -906,7 +877,7 @@ Notes: ${notes.isEmpty ? 'N/A' : notes}$convertedFromLine
             ? widget.prefilledEnquiry!.id 
             : (response['lead_id'] ?? response['id'] ?? "1")).toString();
 
-        String pdfUrl = "https://portal.hitechpragati.in/uploads/quotations/quotation_${_quotationNo.replaceAll('/', '_')}.pdf";
+        String pdfUrl = "${ApiService.baseUrl.replaceAll('/api', '')}/uploads/quotations/quotation_${_quotationNo.replaceAll('/', '_')}.pdf";
 
         // 1. Generate & Upload PDF in the background
         try {
@@ -955,7 +926,7 @@ Notes: ${notes.isEmpty ? 'N/A' : notes}$convertedFromLine
                 if (rawPath.startsWith('http://') || rawPath.startsWith('https://')) {
                   pdfUrl = rawPath;
                 } else {
-                  pdfUrl = "https://portal.hitechpragati.in/$rawPath";
+                  pdfUrl = "${ApiService.baseUrl.replaceAll('/api', '')}/$rawPath";
                 }
               }
             } catch (_) {}
@@ -1289,7 +1260,11 @@ Note: Lead created via Enquiry form.
           );
           if (matchingBrochure.isNotEmpty && matchingBrochure['pdf_path'] != null) {
             final pdfPath = matchingBrochure['pdf_path'] as String;
-            pdfUrl = "${ApiService.baseUrl.replaceAll('/api', '')}/$pdfPath";
+            if (pdfPath.startsWith('http://') || pdfPath.startsWith('https://')) {
+              pdfUrl = pdfPath;
+            } else {
+              pdfUrl = "${ApiService.baseUrl.replaceAll('/api', '')}/$pdfPath";
+            }
           }
           
           await Msg91Service.sendWhatsAppBrochureTemplate(
@@ -1315,6 +1290,10 @@ Note: Lead created via Enquiry form.
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _isBrochureLoading = false);
+      }
     }
   }
 
@@ -1355,26 +1334,13 @@ Note: Lead created via Enquiry form.
           ],
         ),
         content: Text(
-          'Brochure lead has been added successfully.\n\nThe official brochure for "$vehicle" has been sent to $name via WhatsApp (MSG91).',
+          'Brochure lead has been added successfully.\n\nThe official brochure for "$vehicle" has been sent to $name via WhatsApp.',
           style: const TextStyle(fontSize: 15),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('OK'),
-          ),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pop(context);
-              _shareBrochureWhatsApp(phone, name, vehicle, dateStr);
-            },
-            icon: const Icon(Icons.share, size: 16),
-            label: const Text('Send Manually'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3F51B5),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
           ),
         ],
       ),
@@ -1435,18 +1401,6 @@ Note: Lead created via Enquiry form.
             ),
           ),
           actions: [
-            ElevatedButton.icon(
-              onPressed: () {
-                final String pdfPath = "https://portal.hitechpragati.in/uploads/quotations/quotation_${quotationNo.replaceAll('/', '_')}.pdf";
-                Share.share("Check out the generated Proforma Invoice PDF: $pdfPath");
-              },
-              icon: const Icon(Icons.share, size: 18),
-              label: const Text('Share PDF'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3F51B5),
-                foregroundColor: Colors.white,
-              ),
-            ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
@@ -1708,73 +1662,45 @@ Best Regards,
                   ),
                   const SizedBox(height: 12),
 
-                  // State Searchable Picker Input
-                  InkWell(
-                    onTap: () {
-                      _showSearchablePicker(
-                        title: 'Select State',
-                        items: _indiaStatesAndCities.keys.toList()..sort(),
-                        selectedValue: _enquirySelectedState,
-                        onSelected: (String val) {
-                          setState(() {
-                            _enquirySelectedState = val;
-                            _enquirySelectedCity = null; // Reset city on state change
-                          });
-                        },
-                      );
-                    },
-                    child: IgnorePointer(
-                      child: TextField(
-                        controller: TextEditingController(text: _enquirySelectedState ?? ''),
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          labelText: 'State',
-                          hintText: 'Tap to select State',
-                          prefixIcon: const Icon(Icons.map_outlined, color: Color(0xFF3F51B5)),
-                          suffixIcon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          filled: true,
-                          fillColor: Colors.grey.shade50,
-                        ),
-                      ),
+                  // State Input (Disabled, prefilled)
+                  TextField(
+                    controller: TextEditingController(text: _enquirySelectedState ?? 'Karnataka'),
+                    readOnly: true,
+                    enabled: false,
+                    decoration: InputDecoration(
+                      labelText: 'State',
+                      prefixIcon: const Icon(Icons.map_outlined, color: Colors.grey),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.grey.shade200,
                     ),
                   ),
                   const SizedBox(height: 16),
 
-                  // City Searchable Picker Input
-                  InkWell(
-                    onTap: (_enquirySelectedState == null)
-                        ? null
-                        : () {
-                            _showSearchablePicker(
-                              title: 'Select City',
-                              items: List<String>.from(_indiaStatesAndCities[_enquirySelectedState]!)..sort(),
-                              selectedValue: _enquirySelectedCity,
-                              onSelected: (String val) {
-                                setState(() {
-                                  _enquirySelectedCity = val;
-                                });
-                              },
-                            );
-                          },
-                    child: IgnorePointer(
-                      child: TextField(
-                        controller: TextEditingController(text: _enquirySelectedCity ?? ''),
-                        readOnly: true,
-                        enabled: _enquirySelectedState != null,
-                        decoration: InputDecoration(
-                          labelText: 'City',
-                          hintText: _enquirySelectedState == null
-                              ? 'Select State first'
-                              : 'Tap to select City',
-                          prefixIcon: const Icon(Icons.location_city_outlined, color: Color(0xFF3F51B5)),
-                          suffixIcon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          filled: true,
-                          fillColor: _enquirySelectedState == null ? Colors.grey.shade200 : Colors.grey.shade50,
-                        ),
-                      ),
+                  // City Dropdown Input
+                  DropdownButtonFormField<String>(
+                    isExpanded: true,
+                    borderRadius: BorderRadius.circular(12),
+                    value: _enquirySelectedCity,
+                    hint: const Text('Select City'),
+                    decoration: InputDecoration(
+                      labelText: 'City',
+                      prefixIcon: const Icon(Icons.location_city_outlined, color: Color(0xFF3F51B5)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
                     ),
+                    items: (_indiaStatesAndCities['Karnataka'] ?? []).map((String city) {
+                      return DropdownMenuItem<String>(
+                        value: city,
+                        child: Text(city),
+                      );
+                    }).toList(),
+                    onChanged: (String? val) {
+                      setState(() {
+                        _enquirySelectedCity = val;
+                      });
+                    },
                   ),
                   const SizedBox(height: 16),
 
@@ -2121,11 +2047,7 @@ Best Regards,
                                 child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF3F51B5)),
                               ),
                             )
-                          : IconButton(
-                              icon: const Icon(Icons.refresh, color: Color(0xFF3F51B5)),
-                              tooltip: 'Refresh Location',
-                              onPressed: _isFetchingLocation ? null : _fetchUserCoordinates,
-                            ),
+                          : null,
                     ),
                   ),
                   const SizedBox(height: 28),

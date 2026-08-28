@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:android_id/android_id.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../services/api_service.dart';
@@ -75,10 +78,27 @@ class AuthProvider with ChangeNotifier {
       // Get or generate a persistent unique device ID
       String? deviceId = await _storage.read(key: 'device_id');
       if (deviceId == null) {
-        final randomVal = DateTime.now().millisecondsSinceEpoch.toString() + 
-            '-' + 
-            (100000 + (DateTime.now().microsecond % 900000)).toString();
-        deviceId = randomVal;
+        try {
+          if (Platform.isAndroid) {
+            const androidIdPlugin = AndroidId();
+            deviceId = await androidIdPlugin.getId();
+          } else if (Platform.isIOS) {
+            final deviceInfo = DeviceInfoPlugin();
+            final iosInfo = await deviceInfo.iosInfo;
+            deviceId = iosInfo.identifierForVendor;
+          }
+        } catch (e) {
+          debugPrint('Failed to get hardware ID: $e');
+        }
+        
+        // Fallback to random value if hardware ID is unavailable
+        if (deviceId == null || deviceId.isEmpty) {
+          final randomVal = DateTime.now().millisecondsSinceEpoch.toString() + 
+              '-' + 
+              (100000 + (DateTime.now().microsecond % 900000)).toString();
+          deviceId = randomVal;
+        }
+        
         await _storage.write(key: 'device_id', value: deviceId);
       }
 
@@ -95,6 +115,13 @@ class AuthProvider with ChangeNotifier {
         await _storage.write(key: 'user_data', value: jsonEncode(_user!.toJson()));
         await _storage.write(key: 'session_token', value: 'dummy_token_for_session');
         await _storage.delete(key: 'otp_required');
+        
+        // CRITICAL: Clear any stale break data on fresh login
+        await _storage.delete(key: 'break_start_time');
+        await _storage.delete(key: 'total_break_seconds');
+        
+        // Flag for dashboard to kill any zombie background services
+        await _storage.write(key: 'is_fresh_login', value: 'true');
         
         // Removed _tryStartTracking() from here. 
         // DSEDashboard will handle starting the service after checking permissions.
@@ -131,6 +158,7 @@ class AuthProvider with ChangeNotifier {
       role: _user!.role,
       email: newEmail,
       managerId: _user!.managerId,
+      managerName: _user!.managerName,
       tlId: _user!.tlId,
       tlName: _user!.tlName,
     );
@@ -155,6 +183,9 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout({bool isForced = false}) async {
     try {
       await _apiService.get('logout_user.php');
+    } catch (_) {}
+    
+    try {
       FlutterBackgroundService().invoke('stopService');
     } catch (_) {}
     
@@ -163,6 +194,12 @@ class AuthProvider with ChangeNotifier {
     await _storage.delete(key: 'user_data');
     await _storage.delete(key: 'session_token');
     await _storage.delete(key: 'session_cookie');
+    await _storage.delete(key: 'is_user_online');
+    
+    // CRITICAL: Clear break data on logout so they don't get auto-logged out upon re-login
+    await _storage.delete(key: 'break_start_time');
+    await _storage.delete(key: 'total_break_seconds');
+
     if (isForced) {
       await _storage.write(key: 'otp_required', value: 'true');
     } else {

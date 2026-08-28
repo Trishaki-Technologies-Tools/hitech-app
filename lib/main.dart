@@ -20,6 +20,10 @@ void main() async {
     final context = navigatorKey.currentContext;
     if (context != null) {
       final auth = Provider.of<AuthProvider>(context, listen: false);
+      
+      // If they are not authenticated yet (e.g. during login attempt), ignore.
+      if (!auth.isAuthenticated) return;
+      
       auth.logout(isForced: true);
       
       navigatorKey.currentState?.pushAndRemoveUntil(

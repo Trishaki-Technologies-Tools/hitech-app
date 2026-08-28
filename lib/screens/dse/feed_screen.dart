@@ -22,20 +22,22 @@ class FeedScreen extends StatefulWidget {
 class _FeedScreenState extends State<FeedScreen> {
   GoogleMapController? _mapController;
   final LocationService _locationService = LocationService();
-  LatLng? _currentPosition;
-  bool _isLoading = true;
+  LatLng _currentPosition = const LatLng(15.3173, 75.7139); // Karnataka center
+  bool _isLoading = false;
 
   // UX Fix variables for Disabled Location
   StreamSubscription<ServiceStatus>? _serviceStatusSubscription;
+  StreamSubscription<Position>? _positionStreamSubscription; // ADDED REALTIME STREAM
   bool _isLocationDisabled = false;
   Timer? _gpsWarningTimer;
-  int _gpsWarningSeconds = 15; // Warning countdown duration before auto-logout
+  static int _gpsWarningSeconds = 15; // Warning countdown duration before auto-logout
   Set<Marker> _markers = {};
 
   @override
   void initState() {
     super.initState();
     _determinePosition();
+    _startLocationUpdates();
 
     // Listen dynamically to device GPS status changes
     _serviceStatusSubscription = Geolocator.getServiceStatusStream().listen((status) {
@@ -43,16 +45,41 @@ class _FeedScreenState extends State<FeedScreen> {
     });
   }
 
+
+
+  void _startLocationUpdates() {
+    _positionStreamSubscription?.cancel();
+    _positionStreamSubscription = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 20, // STRICT 20-meter filter
+      ),
+    ).listen((Position position) {
+      if (!mounted) return;
+      
+      LatLng newPos = LatLng(position.latitude, position.longitude);
+      
+      setState(() {
+        _currentPosition = newPos;
+      });
+      _updateMarkers();
+    });
+  }
+
   @override
   void didUpdateWidget(covariant FeedScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isOnline != oldWidget.isOnline) {
+      if (widget.isOnline) {
+        _gpsWarningSeconds = 15; // Reset cumulative timer for new active session
+      }
       _determinePosition();
     }
   }
 
   @override
   void dispose() {
+    _positionStreamSubscription?.cancel();
     _serviceStatusSubscription?.cancel();
     _gpsWarningTimer?.cancel();
     _mapController?.dispose();
@@ -64,7 +91,7 @@ class _FeedScreenState extends State<FeedScreen> {
     _gpsWarningTimer?.cancel();
     setState(() {
       _isLocationDisabled = true;
-      _gpsWarningSeconds = 15; // Start at 15 seconds
+      // Do not reset _gpsWarningSeconds here, allow it to continue from left over time
     });
     _updateMarkers();
 
@@ -76,6 +103,8 @@ class _FeedScreenState extends State<FeedScreen> {
         });
       } else {
         _gpsWarningTimer?.cancel();
+        // Fire and forget logout API
+        LocationService().markAttendance('logout', reason: 'Offline Timer');
         // Force log the user out due to disabled location tracking
         Provider.of<AuthProvider>(context, listen: false).logout(isForced: true);
         
@@ -92,34 +121,28 @@ class _FeedScreenState extends State<FeedScreen> {
     _gpsWarningTimer?.cancel();
     setState(() {
       _isLocationDisabled = false;
-      _gpsWarningSeconds = 15;
+      // Do not reset _gpsWarningSeconds here either
     });
     _updateMarkers();
   }
 
   // Update map markers dynamically based on GPS connectivity status
   void _updateMarkers() {
-    if (_currentPosition == null) return;
     setState(() {
       final isOfflineMode = !widget.isOnline;
       _markers = {
-        Marker(
-          markerId: const MarkerId('active_dse_location'),
-          position: _currentPosition!,
-          infoWindow: InfoWindow(
-            title: isOfflineMode 
-                ? 'Last Known Location (Offline)' 
-                : (_isLocationDisabled ? 'Last Known Location' : 'Current Location'),
-            snippet: isOfflineMode
-                ? 'Tracking paused'
-                : (_isLocationDisabled ? 'GPS signal lost / disabled' : 'Active live tracking'),
+        if (!isOfflineMode)
+          Marker(
+            markerId: const MarkerId('active_dse_location'),
+            position: _currentPosition,
+            infoWindow: InfoWindow(
+              title: _isLocationDisabled ? 'Last Known Location' : 'Current Location',
+              snippet: _isLocationDisabled ? 'GPS signal lost / disabled' : 'Active live tracking',
+            ),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              _isLocationDisabled ? BitmapDescriptor.hueOrange : BitmapDescriptor.hueBlue,
+            ),
           ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            isOfflineMode
-                ? BitmapDescriptor.hueRed
-                : (_isLocationDisabled ? BitmapDescriptor.hueOrange : BitmapDescriptor.hueBlue),
-          ),
-        ),
       };
     });
   }
@@ -133,15 +156,15 @@ class _FeedScreenState extends State<FeedScreen> {
         Position? lastKnown = await Geolocator.getLastKnownPosition();
         if (mounted) {
           setState(() {
-            // Center map on last known coordinates, or default to custom showroom coordinates
+            // Center map on last known coordinates, or default to a central location
             _currentPosition = lastKnown != null 
                 ? LatLng(lastKnown.latitude, lastKnown.longitude)
-                : const LatLng(15.8259444, 74.5608169);
+                : const LatLng(15.3173, 75.7139);
             _isLoading = false;
           });
           _startGpsWarningTimer();
           _mapController?.animateCamera(
-            CameraUpdate.newLatLngZoom(_currentPosition!, 15.0),
+            CameraUpdate.newLatLngZoom(_currentPosition, 15.0),
           );
         }
         return;
@@ -159,7 +182,7 @@ class _FeedScreenState extends State<FeedScreen> {
         });
         _updateMarkers();
         _mapController?.animateCamera(
-          CameraUpdate.newLatLngZoom(_currentPosition!, 15.0),
+          CameraUpdate.newLatLngZoom(_currentPosition, 15.0),
         );
       }
 
@@ -172,18 +195,70 @@ class _FeedScreenState extends State<FeedScreen> {
         });
         _updateMarkers();
         _mapController?.animateCamera(
-          CameraUpdate.newLatLngZoom(_currentPosition!, 15.0),
+          CameraUpdate.newLatLngZoom(_currentPosition, 15.0),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        if (_currentPosition == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Location Error: ${e.toString()}')),
-          );
-        }
+        debugPrint('Location Error: ${e.toString()}');
       }
+    }
+  }
+
+  Future<void> _attemptGoOnline() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Location Disabled', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: const Text('Your location is turned off. Please turn it on to go online.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                Geolocator.openLocationSettings();
+              },
+              child: const Text('Open Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    
+    if (permission == LocationPermission.deniedForever || permission == LocationPermission.denied) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Permission Required', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: const Text('Location permissions are required to go online. Please grant them in app settings.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                Geolocator.openAppSettings();
+              },
+              child: const Text('Open App Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    if (widget.onGoOnline != null) {
+      widget.onGoOnline!();
     }
   }
 
@@ -196,19 +271,17 @@ class _FeedScreenState extends State<FeedScreen> {
             ? const Center(child: CircularProgressIndicator())
             : GoogleMap(
                 initialCameraPosition: CameraPosition(
-                  target: _currentPosition ?? const LatLng(0, 0),
-                  zoom: 15.0,
+                  target: _currentPosition,
+                  zoom: widget.isOnline ? 15.0 : 7.0,
                 ),
                 onMapCreated: (controller) {
                   _mapController = controller;
-                  if (_currentPosition != null) {
-                    _mapController?.moveCamera(
-                      CameraUpdate.newLatLngZoom(_currentPosition!, 15.0),
-                    );
-                  }
+                  _mapController?.moveCamera(
+                    CameraUpdate.newLatLngZoom(_currentPosition, widget.isOnline ? 15.0 : 7.0),
+                  );
                 },
                 markers: _markers,
-                myLocationEnabled: !_isLocationDisabled, // Disable blue dot in missing GPS state
+                myLocationEnabled: !_isLocationDisabled && !widget.isOnline, // Use blue dot only when offline
                 myLocationButtonEnabled: false,
                 zoomControlsEnabled: false,
                 mapToolbarEnabled: false,
@@ -341,7 +414,7 @@ class _FeedScreenState extends State<FeedScreen> {
           if (!widget.isOnline)
             Consumer<BreakProvider>(
               builder: (context, breakProvider, child) {
-                if (breakProvider.isOffline) {
+                if (breakProvider.isOffline && breakProvider.isTrackingBreak) {
                   int remaining = 15 - breakProvider.currentSessionSeconds;
                   if (remaining < 0) remaining = 0;
                   int mins = remaining ~/ 60;
@@ -468,8 +541,84 @@ class _FeedScreenState extends State<FeedScreen> {
                       ),
                     ),
                   );
+                } else {
+                  return Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(36),
+                          topRight: Radius.circular(36),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 24,
+                            spreadRadius: 8,
+                            offset: const Offset(0, -6),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.only(top: 14, left: 28, right: 28, bottom: 36),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 4.5,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(color: Colors.blue.shade50, shape: BoxShape.circle),
+                                child: Icon(Icons.location_on_rounded, color: Colors.blue.shade800, size: 26),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Start Your Shift', style: TextStyle(color: Colors.grey.shade900, fontSize: 18, fontWeight: FontWeight.bold)),
+                                    const SizedBox(height: 4),
+                                    Text('You are currently offline.', style: TextStyle(color: Colors.grey.shade500, fontSize: 13, fontWeight: FontWeight.w500)),
+                                    const SizedBox(height: 4),
+                                    Text('Go online to start your shift and access the App.', style: TextStyle(color: Colors.blue.shade700, fontSize: 11, fontWeight: FontWeight.w600)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 28),
+                           if (widget.onGoOnline != null)
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: ElevatedButton.icon(
+                                onPressed: _attemptGoOnline,
+                                icon: const Icon(Icons.flash_on_rounded, size: 18),
+                                label: const Text('Go Online', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF3F51B5),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  elevation: 2,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
                 }
-                return const SizedBox.shrink();
               },
             ),
         ],

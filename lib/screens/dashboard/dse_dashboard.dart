@@ -36,9 +36,31 @@ class _DSEDashboardState extends State<DSEDashboard> {
   @override
   void initState() {
     super.initState();
-    Provider.of<BreakProvider>(context, listen: false).loadFromStorage();
+    final breakProvider = Provider.of<BreakProvider>(context, listen: false);
+    breakProvider.loadFromStorage();
+    breakProvider.addListener(_onBreakTick);
     _checkInitialStatus();
     _setupBackgroundListeners();
+  }
+
+  Future<void> _onBreakTick() async {
+    final breakProvider = Provider.of<BreakProvider>(context, listen: false);
+    if (breakProvider.isOffline && breakProvider.currentSessionSeconds >= 15) {
+      breakProvider.removeListener(_onBreakTick);
+      if (mounted) {
+        await _locationService.markAttendance('logout', reason: 'Offline Timer');
+        Provider.of<AuthProvider>(context, listen: false).logout(isForced: true);
+        Navigator.of(context, rootNavigator: true).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    Provider.of<BreakProvider>(context, listen: false).removeListener(_onBreakTick);
+    super.dispose();
   }
 
   Future<void> _checkInitialStatus() async {
@@ -61,6 +83,8 @@ class _DSEDashboardState extends State<DSEDashboard> {
       }
     }
 
+    final breakProvider = Provider.of<BreakProvider>(context, listen: false);
+    
     // Check if permissions are already granted
     bool hasNotification = await Permission.notification.isGranted;
     LocationPermission permission = await Geolocator.checkPermission();
@@ -68,24 +92,58 @@ class _DSEDashboardState extends State<DSEDashboard> {
 
     if (hasNotification && hasLocation) {
       bool isServiceRunning = await FlutterBackgroundService().isRunning();
-      final breakProvider = Provider.of<BreakProvider>(context, listen: false);
-      if (!isServiceRunning) {
-        // Automatically start the background service and go online!
-        await _toggleOnlineStatus(true);
-      } else {
-        await breakProvider.loadFromStorage();
+      
+      String? isFreshLogin = await storage.read(key: 'is_fresh_login');
+      String? otpRequired = await storage.read(key: 'otp_required');
+
+      String? isUserOnline = await storage.read(key: 'is_user_online');
+
+      if (isFreshLogin == 'true' || otpRequired == 'true') {
+        if (isServiceRunning) {
+          FlutterBackgroundService().invoke('stopService');
+        }
+        if (isFreshLogin == 'true') {
+            await storage.delete(key: 'is_fresh_login');
+        }
+        await storage.write(key: 'is_user_online', value: 'false');
         if (mounted) {
           setState(() {
-            _isOnline = !breakProvider.isOffline;
-            if (!_isOnline) {
-              _selectedIndex = 0;
-            }
+            _isOnline = false;
+            _selectedIndex = 0;
+          });
+        }
+      } else if (breakProvider.isOffline || isUserOnline != 'true') {
+        // User was offline. Ensure service is stopped or marked offline.
+        if (isServiceRunning) {
+          FlutterBackgroundService().invoke('updateUserStatus', {'isOnline': false});
+        }
+        if (mounted) {
+          setState(() {
+            _isOnline = false;
+            _selectedIndex = 0;
+          });
+        }
+      } else {
+        // User was online. Restore state.
+        if (!isServiceRunning) {
+          FlutterBackgroundService().startService();
+        } else {
+          FlutterBackgroundService().invoke('updateUserStatus', {'isOnline': true});
+        }
+        if (mounted) {
+          setState(() {
+            _isOnline = true;
           });
         }
       }
     } else {
-      // Automatically request permissions and go online!
-      await _toggleOnlineStatus(true);
+      // Missing permissions. Stay offline.
+      if (mounted) {
+        setState(() {
+          _isOnline = false;
+          _selectedIndex = 0;
+        });
+      }
     }
   }
 
@@ -101,19 +159,16 @@ class _DSEDashboardState extends State<DSEDashboard> {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                title: const Text('Location Disabled'),
-                content: const Text('Please enable location services to go online.'),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                title: const Text('Location Disabled', style: TextStyle(fontWeight: FontWeight.bold)),
+                content: const Text('Your location is turned off. Please turn it on to go online.'),
                 actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
-                  ),
                   TextButton(
                     onPressed: () async {
                       Navigator.pop(context);
                       await Geolocator.openLocationSettings();
                     },
-                    child: const Text('Open Settings'),
+                    child: const Text('Open Settings', style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -135,33 +190,42 @@ class _DSEDashboardState extends State<DSEDashboard> {
         bool hasLocation = permission == LocationPermission.always || permission == LocationPermission.whileInUse;
 
         if (hasNotification && hasLocation) {
-          final isResuming = breakProvider.isOffline;
-          if (isResuming) {
-            await Future.wait([
-              FlutterBackgroundService().startService(),
-              breakProvider.stopBreak(),
-            ]);
-          } else {
-            await Future.wait([
-              _locationService.markAttendance('login'),
-              FlutterBackgroundService().startService(),
-              breakProvider.stopBreak(),
-            ]);
-          }
+          // Fire and forget to make UI instantly responsive
+          _locationService.markAttendance('login');
+          breakProvider.stopBreak();
+          FlutterBackgroundService().startService();
+          
           // Notify service that user is explicitly online
           FlutterBackgroundService().invoke('updateUserStatus', {'isOnline': true});
+          await const FlutterSecureStorage().write(key: 'is_user_online', value: 'true');
           
           if (mounted) setState(() => _isOnline = true);
         } else {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Please grant all permissions to go Online')),
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                title: const Text('Permission Required', style: TextStyle(fontWeight: FontWeight.bold)),
+                content: const Text('Location permissions are required to go online. Please grant them in app settings.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Geolocator.openAppSettings();
+                    },
+                    child: const Text('Open App Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
             );
           }
         }
       } else {
         await breakProvider.startBreak();
+        _locationService.markAttendance('logout', reason: 'Manual Logout');
         FlutterBackgroundService().invoke('updateUserStatus', {'isOnline': false});
+        await const FlutterSecureStorage().write(key: 'is_user_online', value: 'false');
         
         if (mounted) {
           setState(() {
@@ -172,9 +236,37 @@ class _DSEDashboardState extends State<DSEDashboard> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        final errorStr = e.toString().toLowerCase();
+        if (!errorStr.contains('location') && !errorStr.contains('permission')) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: const Row(
+                children: [
+                  Icon(Icons.error_outline, color: Colors.red, size: 28),
+                  SizedBox(width: 10),
+                  Text('Access Denied', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              content: Text(
+                e.toString().replaceAll('Exception: ', ''),
+                style: const TextStyle(fontSize: 16, height: 1.4),
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF3F51B5),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          );
+        }
       }
     } finally {
       if (mounted) {
@@ -190,6 +282,7 @@ class _DSEDashboardState extends State<DSEDashboard> {
 
     FlutterBackgroundService().on('forceLogout').listen((event) {
       if (!mounted) return;
+      if (!_isOnline) return; // Ignore if freshly logged in or intentionally offline
       Provider.of<AuthProvider>(context, listen: false).logout(isForced: true);
       Navigator.of(context, rootNavigator: true).pushReplacement(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -390,7 +483,7 @@ class _DSEDashboardState extends State<DSEDashboard> {
                   if (!_isOnline)
                     Consumer<BreakProvider>(
                       builder: (context, breakProvider, child) {
-                        if (breakProvider.isOffline) {
+                        if (breakProvider.isOffline && breakProvider.isTrackingBreak) {
                           int remaining = 15 - breakProvider.currentSessionSeconds;
                           if (remaining < 0) remaining = 0;
                           int mins = remaining ~/ 60;

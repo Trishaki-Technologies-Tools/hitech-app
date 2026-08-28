@@ -13,6 +13,7 @@ class BreakProvider with ChangeNotifier {
 
   int get totalBreakSeconds => _totalBreakSeconds;
   bool get isOffline => _isOffline;
+  bool get isTrackingBreak => _breakStartTime != null;
 
   // Calculate current total including the active break session
   int get currentSessionSeconds {
@@ -74,21 +75,41 @@ class BreakProvider with ChangeNotifier {
     if (_isOffline) return;
     
     _isOffline = true;
-    _breakStartTime = DateTime.now();
-    await _storage.write(key: 'break_start_time', value: _breakStartTime!.millisecondsSinceEpoch.toString());
-    await _storage.write(key: 'last_break_date', value: DateFormat('yyyy-MM-dd').format(_breakStartTime!));
     
-    _startTicker();
+    // Check if within working hours before starting the timer
+    String loginStr = await _storage.read(key: 'office_login_time') ?? '09:00';
+    String logoutStr = await _storage.read(key: 'office_logout_time') ?? '18:00';
+    final now = DateTime.now();
+    final currentStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    
+    bool withinHours = false;
+    if (loginStr.compareTo(logoutStr) <= 0) {
+      withinHours = (currentStr.compareTo(loginStr) >= 0 && currentStr.compareTo(logoutStr) <= 0);
+    } else {
+      withinHours = (currentStr.compareTo(loginStr) >= 0 || currentStr.compareTo(logoutStr) <= 0);
+    }
+    
+    if (withinHours) {
+      _breakStartTime = DateTime.now();
+      await _storage.write(key: 'break_start_time', value: _breakStartTime!.millisecondsSinceEpoch.toString());
+      await _storage.write(key: 'last_break_date', value: DateFormat('yyyy-MM-dd').format(_breakStartTime!));
+      _startTicker();
+    } else {
+      await _storage.delete(key: 'break_start_time'); // Ensure no stray timers
+    }
+    
     notifyListeners();
   }
 
   Future<void> stopBreak() async {
-    _totalBreakSeconds = 0;
+    if (_breakStartTime != null) {
+      _totalBreakSeconds += DateTime.now().difference(_breakStartTime!).inSeconds;
+    }
     _isOffline = false;
     _breakStartTime = null;
     _ticker?.cancel();
 
-    await _storage.write(key: 'total_break_seconds', value: '0');
+    await _storage.write(key: 'total_break_seconds', value: _totalBreakSeconds.toString());
     await _storage.delete(key: 'break_start_time');
     
     notifyListeners();

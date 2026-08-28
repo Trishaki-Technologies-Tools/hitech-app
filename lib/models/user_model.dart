@@ -5,6 +5,7 @@ class UserModel {
   final String role;
   final String? email;
   final String? managerId;
+  final String? managerName;
   final String? tlId;
   final String? tlName;
 
@@ -15,6 +16,7 @@ class UserModel {
     required this.role,
     this.email,
     this.managerId,
+    this.managerName,
     this.tlId,
     this.tlName,
   });
@@ -27,6 +29,7 @@ class UserModel {
       role: json['role'] ?? '',
       email: json['email'],
       managerId: json['manager_id']?.toString(),
+      managerName: json['manager_name'],
       tlId: json['tl_id']?.toString(),
       tlName: json['tl_name'],
     );
@@ -40,6 +43,7 @@ class UserModel {
       'role': role,
       'email': email,
       'manager_id': managerId,
+      'manager_name': managerName,
       'tl_id': tlId,
       'tl_name': tlName,
     };

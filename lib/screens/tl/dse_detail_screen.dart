@@ -715,8 +715,12 @@ class _DseAttendanceScreenState extends State<DseAttendanceScreen> {
                                     const Icon(Icons.logout, size: 14, color: Colors.orange),
                                     const SizedBox(width: 4),
                                     Text(
-                                      'Logout: ${_formatTime(logoutTime)}',
-                                      style: const TextStyle(fontSize: 13, color: Colors.orange, fontWeight: FontWeight.w500),
+                                      (log['logout_reason'] != null) ? '${log['logout_reason']}: ${_formatTime(logoutTime)}' : 'Logout: ${_formatTime(logoutTime)}',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: log['logout_reason'] == 'Offline Timer' ? Colors.red : Colors.orange,
+                                        fontWeight: FontWeight.w500
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -868,11 +872,13 @@ class _DseAttendanceScreenState extends State<DseAttendanceScreen> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        hasOngoing ? 'Active' : (lastLog != null ? _formatTime(lastLog['logout_time']) : '--:--'),
+                                        hasOngoing ? 'Still Working' : (lastLog != null ? (lastLog['logout_reason'] ?? _formatTime(lastLog['logout_time'])) : '--:--'),
                                         style: TextStyle(
-                                          fontSize: 13, 
-                                          fontWeight: FontWeight.bold, 
-                                          color: hasOngoing ? Colors.blue : Colors.black87
+                                          fontWeight: FontWeight.w600, 
+                                          fontSize: 13,
+                                          color: hasOngoing 
+                                            ? Colors.blue 
+                                            : (lastLog != null && lastLog['logout_reason'] == 'Offline Timer' ? Colors.red : Colors.black87),
                                         ),
                                       ),
                                       if (!hasOngoing && lastLog != null) ...[

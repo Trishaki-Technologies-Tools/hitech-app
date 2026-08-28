@@ -35,9 +35,30 @@ class _TLDashboardState extends State<TLDashboard> {
   @override
   void initState() {
     super.initState();
-    Provider.of<BreakProvider>(context, listen: false).loadFromStorage();
+    final breakProvider = Provider.of<BreakProvider>(context, listen: false);
+    breakProvider.loadFromStorage();
+    breakProvider.addListener(_onBreakTick);
     _checkInitialStatus();
     _setupBackgroundListeners();
+  }
+
+  void _onBreakTick() {
+    final breakProvider = Provider.of<BreakProvider>(context, listen: false);
+    if (breakProvider.isOffline && breakProvider.currentSessionSeconds >= 15) {
+      if (mounted) {
+        _locationService.markAttendance('logout', reason: 'Offline Timer');
+        Provider.of<AuthProvider>(context, listen: false).logout(isForced: true);
+        Navigator.of(context, rootNavigator: true).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    Provider.of<BreakProvider>(context, listen: false).removeListener(_onBreakTick);
+    super.dispose();
   }
 
   Future<void> _checkInitialStatus() async {
@@ -60,25 +81,60 @@ class _TLDashboardState extends State<TLDashboard> {
       }
     }
 
+    final breakProvider = Provider.of<BreakProvider>(context, listen: false);
+
     bool hasNotification = await Permission.notification.isGranted;
     LocationPermission permission = await Geolocator.checkPermission();
     bool hasLocation = permission == LocationPermission.always || permission == LocationPermission.whileInUse;
 
     if (hasNotification && hasLocation) {
       bool isServiceRunning = await FlutterBackgroundService().isRunning();
-      final breakProvider = Provider.of<BreakProvider>(context, listen: false);
-      if (!isServiceRunning) {
-        // Automatically start the background service and go online!
-        await _toggleOnlineStatus(true);
-      } else {
-        await breakProvider.loadFromStorage();
+      
+      String? isFreshLogin = await storage.read(key: 'is_fresh_login');
+
+      if (isFreshLogin == 'true') {
+        if (isServiceRunning) {
+          FlutterBackgroundService().invoke('stopService');
+        }
+        await storage.delete(key: 'is_fresh_login');
         if (mounted) {
-          setState(() => _isOnline = !breakProvider.isOffline);
+          setState(() {
+            _isOnline = false;
+            _selectedIndex = 0;
+          });
+        }
+      } else if (breakProvider.isOffline) {
+        // User was offline. Ensure service is stopped or marked offline.
+        if (isServiceRunning) {
+          FlutterBackgroundService().invoke('updateUserStatus', {'isOnline': false});
+        }
+        if (mounted) {
+          setState(() {
+            _isOnline = false;
+            _selectedIndex = 0;
+          });
+        }
+      } else {
+        // User was online. Restore state.
+        if (!isServiceRunning) {
+          FlutterBackgroundService().startService();
+        } else {
+          FlutterBackgroundService().invoke('updateUserStatus', {'isOnline': true});
+        }
+        if (mounted) {
+          setState(() {
+            _isOnline = true;
+          });
         }
       }
     } else {
-      // Automatically request permissions and go online!
-      await _toggleOnlineStatus(true);
+      // Missing permissions. Stay offline.
+      if (mounted) {
+        setState(() {
+          _isOnline = false;
+          _selectedIndex = 0;
+        });
+      }
     }
   }
 
@@ -94,19 +150,16 @@ class _TLDashboardState extends State<TLDashboard> {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                title: const Text('Location Disabled'),
-                content: const Text('Please enable location services to go online.'),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                title: const Text('Location Disabled', style: TextStyle(fontWeight: FontWeight.bold)),
+                content: const Text('Your location is turned off. Please turn it on to go online.'),
                 actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
-                  ),
                   TextButton(
                     onPressed: () async {
                       Navigator.pop(context);
                       await Geolocator.openLocationSettings();
                     },
-                    child: const Text('Open Settings'),
+                    child: const Text('Open Settings', style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -128,40 +181,76 @@ class _TLDashboardState extends State<TLDashboard> {
         bool hasLocation = permission == LocationPermission.always || permission == LocationPermission.whileInUse;
 
         if (hasNotification && hasLocation) {
-          final isResuming = breakProvider.isOffline;
-          if (isResuming) {
-            await Future.wait([
-              FlutterBackgroundService().startService(),
-              breakProvider.stopBreak(),
-            ]);
-          } else {
-            await Future.wait([
-              _locationService.markAttendance('login'),
-              FlutterBackgroundService().startService(),
-              breakProvider.stopBreak(),
-            ]);
-          }
+          // Fire and forget to make UI instantly responsive
+          _locationService.markAttendance('login');
+          breakProvider.stopBreak();
+          FlutterBackgroundService().startService();
           FlutterBackgroundService().invoke('updateUserStatus', {'isOnline': true});
           
           if (mounted) setState(() => _isOnline = true);
         } else {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Please grant all permissions to go Online')),
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                title: const Text('Permission Required', style: TextStyle(fontWeight: FontWeight.bold)),
+                content: const Text('Location permissions are required to go online. Please grant them in app settings.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Geolocator.openAppSettings();
+                    },
+                    child: const Text('Open App Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
             );
           }
         }
       } else {
         await breakProvider.startBreak();
+        _locationService.markAttendance('logout', reason: 'Manual Logout');
         FlutterBackgroundService().invoke('updateUserStatus', {'isOnline': false});
         
-        if (mounted) setState(() => _isOnline = false);
+        if (mounted) {
+          setState(() => _isOnline = false);
+        }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        final errorStr = e.toString().toLowerCase();
+        if (!errorStr.contains('location') && !errorStr.contains('permission')) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: const Row(
+                children: [
+                  Icon(Icons.error_outline, color: Colors.red, size: 28),
+                  SizedBox(width: 10),
+                  Text('Access Denied', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              content: Text(
+                e.toString().replaceAll('Exception: ', ''),
+                style: const TextStyle(fontSize: 16, height: 1.4),
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF3F51B5),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          );
+        }
       }
     } finally {
       if (mounted) {
@@ -185,7 +274,10 @@ class _TLDashboardState extends State<TLDashboard> {
   }
 
   List<Widget> get _widgetOptions => [
-    FeedScreen(isOnline: _isOnline),
+    FeedScreen(
+      isOnline: _isOnline,
+      onGoOnline: () => _toggleOnlineStatus(true),
+    ),
     const LeadListScreen(),
     const AttendanceScreen(),
     const UserListScreen(showAppBar: false),
@@ -382,8 +474,10 @@ class _TLDashboardState extends State<TLDashboard> {
             ),
           ),
       body: _widgetOptions[_selectedIndex],
-      bottomNavigationBar: Container(
-        color: Colors.transparent,
+      bottomNavigationBar: !_isOnline 
+        ? null 
+        : Container(
+            color: Colors.transparent,
         padding: const EdgeInsets.only(left: 20, right: 20, bottom: 24, top: 8),
         child: Container(
           height: 72,

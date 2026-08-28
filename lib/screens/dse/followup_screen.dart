@@ -104,7 +104,7 @@ class _FollowupScreenState extends State<FollowupScreen> with SingleTickerProvid
     return 'Unknown';
   }
 
-  String? _parseFollowUpDate(String req) {
+  String? _parseFollowUpDate(String req, [DateTime? createdAt]) {
     final lines = req.split('\n');
     for (var line in lines) {
       if (line.contains(':')) {
@@ -115,6 +115,21 @@ class _FollowupScreenState extends State<FollowupScreen> with SingleTickerProvid
           return val;
         }
       }
+    }
+    // Fallback 1: Check for standard "Date:" line in requirement
+    for (var line in lines) {
+      if (line.contains(':')) {
+        final index = line.indexOf(':');
+        final key = line.substring(0, index).trim();
+        final val = line.substring(index + 1).trim();
+        if (key.toLowerCase() == 'date') {
+          return val;
+        }
+      }
+    }
+    // Fallback 2: Format createdAt date
+    if (createdAt != null) {
+      return "${createdAt.day.toString().padLeft(2, '0')}/${createdAt.month.toString().padLeft(2, '0')}/${createdAt.year}";
     }
     return null;
   }
@@ -225,17 +240,24 @@ class _FollowupScreenState extends State<FollowupScreen> with SingleTickerProvid
     }
   }
 
-  DateTime? _getFollowUpDateTime(String req) {
-    final dateStr = _parseFollowUpDate(req);
-    if (dateStr == null || dateStr.isEmpty || dateStr.toLowerCase() == 'n/a') return null;
+  DateTime? _getFollowUpDateTime(String req, [DateTime? createdAt]) {
+    final dateStr = _parseFollowUpDate(req, createdAt);
+    if (dateStr == null || dateStr.isEmpty || dateStr.toLowerCase() == 'n/a') {
+      if (createdAt != null) return DateTime(createdAt.year, createdAt.month, createdAt.day);
+      return null;
+    }
     try {
       final parts = dateStr.split('/');
-      if (parts.length != 3) return null;
+      if (parts.length != 3) {
+        if (createdAt != null) return DateTime(createdAt.year, createdAt.month, createdAt.day);
+        return null;
+      }
       final day = int.parse(parts[0]);
       final month = int.parse(parts[1]);
       final year = int.parse(parts[2]);
       return DateTime(year, month, day);
     } catch (e) {
+      if (createdAt != null) return DateTime(createdAt.year, createdAt.month, createdAt.day);
       return null;
     }
   }
@@ -530,7 +552,7 @@ class _FollowupScreenState extends State<FollowupScreen> with SingleTickerProvid
                 ],
               ),
               const SizedBox(height: 10),
-              _buildFollowUpTag(_parseFollowUpDate(lead.requirement)),
+              _buildFollowUpTag(_parseFollowUpDate(lead.requirement, lead.createdAt)),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -757,7 +779,7 @@ class _FollowupScreenState extends State<FollowupScreen> with SingleTickerProvid
     List<LeadModel> monthList = [];
 
     for (var lead in list) {
-      final fDate = _getFollowUpDateTime(lead.requirement);
+      final fDate = _getFollowUpDateTime(lead.requirement, lead.createdAt);
       if (fDate == null) continue;
 
       if (fDate.isAtSameMomentAs(todayDate)) {
@@ -772,8 +794,8 @@ class _FollowupScreenState extends State<FollowupScreen> with SingleTickerProvid
     }
 
     int compareFollowUpDates(LeadModel a, LeadModel b) {
-      final dateA = _getFollowUpDateTime(a.requirement) ?? DateTime(1970);
-      final dateB = _getFollowUpDateTime(b.requirement) ?? DateTime(1970);
+      final dateA = _getFollowUpDateTime(a.requirement, a.createdAt) ?? DateTime(1970);
+      final dateB = _getFollowUpDateTime(b.requirement, b.createdAt) ?? DateTime(1970);
       return dateA.compareTo(dateB);
     }
 
@@ -781,8 +803,8 @@ class _FollowupScreenState extends State<FollowupScreen> with SingleTickerProvid
     weekList.sort(compareFollowUpDates);
     monthList.sort(compareFollowUpDates);
     yesterdayList.sort((a, b) {
-      final dateA = _getFollowUpDateTime(a.requirement) ?? DateTime(1970);
-      final dateB = _getFollowUpDateTime(b.requirement) ?? DateTime(1970);
+      final dateA = _getFollowUpDateTime(a.requirement, a.createdAt) ?? DateTime(1970);
+      final dateB = _getFollowUpDateTime(b.requirement, b.createdAt) ?? DateTime(1970);
       return dateB.compareTo(dateA);
     });
 
@@ -962,16 +984,14 @@ class _FollowupScreenState extends State<FollowupScreen> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     final enquiriesFollowup = _leads.where((l) {
-      final hasFollowUp = _parseFollowUpDate(l.requirement) != null;
       final isLead = l.requirement.contains('Quotation No:');
       final isBrochure = l.requirement.contains('Brochure');
-      return !isLead && !isBrochure && hasFollowUp && l.status != 'Closed';
+      return !isLead && !isBrochure && l.status != 'Closed';
     }).toList();
 
     final leadsFollowup = _leads.where((l) {
-      final hasFollowUp = _parseFollowUpDate(l.requirement) != null;
       final isLead = l.requirement.contains('Quotation No:');
-      return isLead && hasFollowUp && l.status != 'Closed';
+      return isLead && l.status != 'Closed';
     }).toList();
 
     return Scaffold(

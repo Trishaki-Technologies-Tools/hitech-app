@@ -12,8 +12,9 @@ class ApiException implements Exception {
 }
 
 class ApiService {
+  // static String get baseUrl => 'http://192.168.29.73/Hitech_Pragati/Hitech-Pragati-Web/api'; // Use 10.0.2.2 for Android emulator, or your local WiFi IP for physical device
   static String get baseUrl => 'https://portal.hitechpragati.in/api';
-  
+
   static void Function()? onUnauthorized;
   
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
