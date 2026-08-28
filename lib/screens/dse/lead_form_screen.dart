@@ -13,6 +13,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../widgets/location_disclosure_dialog.dart';
 
 class BrochureItem {
   final String title;
@@ -449,7 +450,12 @@ class _LeadFormScreenState extends State<LeadFormScreen> {
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
+        if (mounted) {
+          bool accepted = await LocationDisclosureDialog.show(context);
+          if (accepted) {
+            permission = await Geolocator.requestPermission();
+          }
+        }
         if (permission == LocationPermission.denied) {
           setState(() => _isFetchingLocation = false);
           return;

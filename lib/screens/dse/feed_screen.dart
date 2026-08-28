@@ -9,6 +9,7 @@ import '../../providers/break_provider.dart';
 import '../../services/location_service.dart';
 import 'lead_form_screen.dart';
 import '../auth/login_screen.dart';
+import '../../widgets/location_disclosure_dialog.dart';
 
 class FeedScreen extends StatefulWidget {
   final bool isOnline;
@@ -232,7 +233,12 @@ class _FeedScreenState extends State<FeedScreen> {
 
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+      if (mounted) {
+        bool accepted = await LocationDisclosureDialog.show(context);
+        if (accepted) {
+          permission = await Geolocator.requestPermission();
+        }
+      }
     }
     
     if (permission == LocationPermission.deniedForever || permission == LocationPermission.denied) {

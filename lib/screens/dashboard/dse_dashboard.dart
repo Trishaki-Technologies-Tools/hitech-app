@@ -19,6 +19,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../services/background_location_service.dart';
 import '../../services/location_service.dart';
+import '../../widgets/location_disclosure_dialog.dart';
 
 class DSEDashboard extends StatefulWidget {
   const DSEDashboard({super.key});
@@ -183,7 +184,12 @@ class _DSEDashboardState extends State<DSEDashboard> {
         
         LocationPermission permission = await Geolocator.checkPermission();
         if (permission == LocationPermission.denied) {
-          permission = await Geolocator.requestPermission();
+          if (mounted) {
+            bool accepted = await LocationDisclosureDialog.show(context);
+            if (accepted) {
+              permission = await Geolocator.requestPermission();
+            }
+          }
         }
 
         bool hasNotification = await Permission.notification.isGranted;

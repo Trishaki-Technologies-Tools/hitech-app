@@ -18,6 +18,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../services/location_service.dart';
+import '../../widgets/location_disclosure_dialog.dart';
 
 class TLDashboard extends StatefulWidget {
   const TLDashboard({super.key});
@@ -174,7 +175,12 @@ class _TLDashboardState extends State<TLDashboard> {
         
         LocationPermission permission = await Geolocator.checkPermission();
         if (permission == LocationPermission.denied) {
-          permission = await Geolocator.requestPermission();
+          if (mounted) {
+            bool accepted = await LocationDisclosureDialog.show(context);
+            if (accepted) {
+              permission = await Geolocator.requestPermission();
+            }
+          }
         }
 
         bool hasNotification = await Permission.notification.isGranted;

@@ -8,6 +8,8 @@ import '../../services/api_service.dart';
 import '../dashboard/tl_dashboard.dart';
 import '../dashboard/dse_dashboard.dart';
 
+import '../../widgets/location_disclosure_dialog.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -29,7 +31,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _checkAndRequestPermissions();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndRequestPermissions();
+    });
   }
 
   Future<void> _checkAndRequestPermissions() async {
@@ -41,7 +45,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+      if (mounted) {
+        bool accepted = await LocationDisclosureDialog.show(context);
+        if (accepted) {
+          permission = await Geolocator.requestPermission();
+        }
+      }
     }
 
     if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
