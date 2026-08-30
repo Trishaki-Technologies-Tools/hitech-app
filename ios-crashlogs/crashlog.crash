@@ -1,0 +1,372 @@
+Incident Identifier: 4DB68171-1487-4F32-B0DE-5EF67985B2FB
+Distributor ID:      com.apple.TestFlight
+Hardware Model:      iPhone14,5
+Process:             Runner [4485]
+Path:                /private/var/containers/Bundle/Application/2232B111-9F6F-4CA9-8552-88410994C7C7/Runner.app/Runner
+Identifier:          com.hitechpragati.app
+Version:             1.0.2 (8)
+AppStoreTools:       17F106
+AppVariant:          1:iPhone14,5:26
+Beta:                YES
+Code Type:           ARM-64 (Native)
+Role:                Foreground
+Parent Process:      launchd [1]
+Coalition:           com.hitechpragati.app [1103]
+
+Date/Time:           2026-08-29 06:56:47.6729 +0530
+Launch Time:         2026-08-29 06:56:43.8602 +0530
+OS Version:          iPhone OS 26.6 (23G71)
+Release Type:        User
+Baseband Version:    5.51.03
+Report Version:      104
+
+Exception Type:  EXC_CRASH (SIGABRT)
+Exception Codes: 0x0000000000000000, 0x0000000000000000
+Termination Reason: SIGNAL 6 Abort trap: 6
+Terminating Process: Runner [4485]
+
+Triggered by Thread:  0
+
+Last Exception Backtrace:
+0   CoreFoundation                	0x190890244 __exceptionPreprocess + 164 (:-1)
+1   libobjc.A.dylib               	0x18d35d224 objc_exception_throw + 88 (objc-exception.mm:356)
+2   CoreFoundation                	0x1908f5f98 +[NSException raise:format:] + 128 (:-1)
+3   Runner                        	0x1029f3ed4 0x102874000 + 1572564
+4   Runner                        	0x1029f23c8 0x102874000 + 1565640
+5   Runner                        	0x102ed794c 0x102874000 + 6699340
+6   Runner                        	0x102ed78a8 0x102874000 + 6699176
+7   Flutter                       	0x1041d8730 -[FlutterPlatformViewsController onCreate:result:] + 820 (FlutterPlatformViewsController.mm:396)
+8   Flutter                       	0x1041d8380 -[FlutterPlatformViewsController onMethodCall:result:] + 356 (FlutterPlatformViewsController.mm:0)
+9   Flutter                       	0x1041cb6fc __47-[FlutterEngine maybeSetupPlatformViewChannels]_block_invoke_2 + 120 (FlutterEngine.mm:764)
+10  Flutter                       	0x1046d4d54 __45-[FlutterMethodChannel setMethodCallHandler:]_block_invoke + 164 (FlutterChannels.mm:315)
+11  Flutter                       	0x10421b4c0 invocation function for block in flutter::PlatformMessageHandlerIos::HandlePlatformMessage(std::__fl::unique_ptr<flutter::PlatformMessage, std::__fl::default_delete<flutter::PlatformMessage>>) + 116 (platform_message_handler_ios.mm:70)
+12  libdispatch.dylib             	0x1cb2b99a8 _dispatch_call_block_and_release + 32 (:-1)
+13  libdispatch.dylib             	0x1cb2d31e4 _dispatch_client_callout + 16 (:-1)
+14  libdispatch.dylib             	0x1cb2f0e10 _dispatch_continuation_invoke_inline + 208 (:-1)
+15  libdispatch.dylib             	0x1cb2f0e10 _dispatch_continuation_pop_inline + 476 (:-1)
+16  libdispatch.dylib             	0x1cb2f0e10 _dispatch_main_queue_drain.cold.6 + 832 (:-1)
+17  libdispatch.dylib             	0x1cb2c8964 _os_tsd_set_direct + 16 (:-1)
+18  libdispatch.dylib             	0x1cb2c8964 _pthread_setspecific_direct + 16 (:-1)
+19  libdispatch.dylib             	0x1cb2c8964 _dispatch_thread_setspecific + 16 (:-1)
+20  libdispatch.dylib             	0x1cb2c8964 _dispatch_adopt_wlh_anon_recurse + 72 (:-1)
+21  libdispatch.dylib             	0x1cb2c8964 _dispatch_adopt_wlh_anon + 72 (:-1)
+22  libdispatch.dylib             	0x1cb2c8964 _dispatch_main_queue_drain + 176 (:-1)
+23  libdispatch.dylib             	0x1cb2c88a4 _dispatch_main_queue_callback_4CF + 44 (:-1)
+24  CoreFoundation                	0x19081d038 __CFRUNLOOP_IS_SERVICING_THE_MAIN_DISPATCH_QUEUE__ + 16 (:-1)
+25  CoreFoundation                	0x1907aa604 __CFRunLoopRun + 1944 (:-1)
+26  CoreFoundation                	0x1907a954c _CFRunLoopRunSpecificWithOptions + 532 (:-1)
+27  GraphicsServices              	0x236775498 GSEventRunModal + 120 (:-1)
+28  UIKitCore                     	0x1964dd670 -[UIApplication _run] + 796 (:-1)
+29  UIKitCore                     	0x196448158 UIApplicationMain + 332 (:-1)
+30  UIKitCore                     	0x196654aa4 UIApplicationMain(_:_:_:_:) + 104 (:-1)
+31  Runner                        	0x10287863c 0x102874000 + 17980
+32  dyld                          	0x18d3b5c1c start + 6928 (:-1)
+
+Thread 0 name:
+Thread 0 Crashed:
+0   libsystem_kernel.dylib        	0x000000023fdef1d0 __pthread_kill + 8
+1   libsystem_pthread.dylib       	0x00000001f01417dc pthread_kill + 268 (:-1)
+2   libsystem_c.dylib             	0x000000019c36efcc abort + 148 (:-1)
+3   libc++abi.dylib               	0x000000018d45efd4 __abort_message + 132 (:-1)
+4   libc++abi.dylib               	0x000000018d460b90 demangling_terminate_handler() + 296 (:-1)
+5   libobjc.A.dylib               	0x000000018d35f868 _objc_terminate() + 156 (objc-exception.mm:496)
+6   libc++abi.dylib               	0x000000018d46b1f8 std::__terminate(void (*)()) + 16 (:-1)
+7   libc++abi.dylib               	0x000000018d46ce18 __cxxabiv1::failed_throw(__cxxabiv1::__cxa_exception*) + 88 (:-1)
+8   libc++abi.dylib               	0x000000018d459360 __cxa_throw + 92 (:-1)
+9   libobjc.A.dylib               	0x000000018d35d38c objc_exception_throw + 448 (objc-exception.mm:385)
+10  CoreFoundation                	0x00000001908f5f98 +[NSException raise:format:] + 128 (:-1)
+11  Runner                        	0x00000001029f3ed4 0x102874000 + 1572564
+12  Runner                        	0x00000001029f23c8 0x102874000 + 1565640
+13  Runner                        	0x0000000102ed794c 0x102874000 + 6699340
+14  Runner                        	0x0000000102ed78a8 0x102874000 + 6699176
+15  Flutter                       	0x00000001041d8730 -[FlutterPlatformViewsController onCreate:result:] + 820 (FlutterPlatformViewsController.mm:396)
+16  Flutter                       	0x00000001041d8380 -[FlutterPlatformViewsController onMethodCall:result:] + 356 (FlutterPlatformViewsController.mm:0)
+17  Flutter                       	0x00000001041cb6fc __47-[FlutterEngine maybeSetupPlatformViewChannels]_block_invoke_2 + 120 (FlutterEngine.mm:764)
+18  Flutter                       	0x00000001046d4d54 __45-[FlutterMethodChannel setMethodCallHandler:]_block_invoke + 164 (FlutterChannels.mm:315)
+19  Flutter                       	0x000000010421b4c0 invocation function for block in flutter::PlatformMessageHandlerIos::HandlePlatformMessage(std::__fl::unique_ptr<flutter::PlatformMessage, std::__fl::default_delete<flutter::PlatformMessage>>) + 116 (platform_message_handler_ios.mm:70)
+20  libdispatch.dylib             	0x00000001cb2b99a8 _dispatch_call_block_and_release + 32 (:-1)
+21  libdispatch.dylib             	0x00000001cb2d31e4 _dispatch_client_callout + 16 (:-1)
+22  libdispatch.dylib             	0x00000001cb2f0e10 _dispatch_continuation_invoke_inline + 208 (:-1)
+23  libdispatch.dylib             	0x00000001cb2f0e10 _dispatch_continuation_pop_inline + 476 (:-1)
+24  libdispatch.dylib             	0x00000001cb2f0e10 _dispatch_main_queue_drain.cold.6 + 832 (:-1)
+25  libdispatch.dylib             	0x00000001cb2c8964 _os_tsd_set_direct + 16 (:-1)
+26  libdispatch.dylib             	0x00000001cb2c8964 _pthread_setspecific_direct + 16 (:-1)
+27  libdispatch.dylib             	0x00000001cb2c8964 _dispatch_thread_setspecific + 16 (:-1)
+28  libdispatch.dylib             	0x00000001cb2c8964 _dispatch_adopt_wlh_anon_recurse + 72 (:-1)
+29  libdispatch.dylib             	0x00000001cb2c8964 _dispatch_adopt_wlh_anon + 72 (:-1)
+30  libdispatch.dylib             	0x00000001cb2c8964 _dispatch_main_queue_drain + 176 (:-1)
+31  libdispatch.dylib             	0x00000001cb2c88a4 _dispatch_main_queue_callback_4CF + 44 (:-1)
+32  CoreFoundation                	0x000000019081d038 __CFRUNLOOP_IS_SERVICING_THE_MAIN_DISPATCH_QUEUE__ + 16 (:-1)
+33  CoreFoundation                	0x00000001907aa604 __CFRunLoopRun + 1944 (:-1)
+34  CoreFoundation                	0x00000001907a954c _CFRunLoopRunSpecificWithOptions + 532 (:-1)
+35  GraphicsServices              	0x0000000236775498 GSEventRunModal + 120 (:-1)
+36  UIKitCore                     	0x00000001964dd670 -[UIApplication _run] + 796 (:-1)
+37  UIKitCore                     	0x0000000196448158 UIApplicationMain + 332 (:-1)
+38  UIKitCore                     	0x0000000196654aa4 UIApplicationMain(_:_:_:_:) + 104 (:-1)
+39  Runner                        	0x000000010287863c 0x102874000 + 17980
+40  dyld                          	0x000000018d3b5c1c start + 6928 (:-1)
+
+Thread 1:
+
+Thread 2:
+
+Thread 3:
+
+Thread 4:
+
+Thread 5:
+
+Thread 6:
+
+Thread 7:
+
+Thread 8 name:
+Thread 8:
+0   libsystem_kernel.dylib        	0x000000023fde4cd4 mach_msg2_trap + 8
+1   libsystem_kernel.dylib        	0x000000023fde830c mach_msg2_internal + 76 (:-1)
+2   libsystem_kernel.dylib        	0x000000023fde822c mach_msg2 + 4 (:-1)
+3   libsystem_kernel.dylib        	0x000000023fde822c mach_msg_overwrite + 424 (:-1)
+4   libsystem_kernel.dylib        	0x000000023fde8078 mach_msg + 24 (:-1)
+5   CoreFoundation                	0x00000001907e0344 __CFRunLoopServiceMachPort + 160 (:-1)
+6   CoreFoundation                	0x00000001907aa310 __CFRunLoopRun + 1188 (:-1)
+7   CoreFoundation                	0x00000001907a954c _CFRunLoopRunSpecificWithOptions + 532 (:-1)
+8   Foundation                    	0x000000018da16cf0 -[NSRunLoop(NSRunLoop) runMode:beforeDate:] + 212 (:-1)
+9   Foundation                    	0x000000018da16bd8 -[NSRunLoop(NSRunLoop) runUntilDate:] + 64 (:-1)
+10  UIKitCore                     	0x00000001964a2eac -[UIEventFetcher threadMain] + 420 (:-1)
+11  Foundation                    	0x000000018da9a904 __NSThread__start__ + 732 (:-1)
+12  libsystem_pthread.dylib       	0x00000001f013e438 _pthread_start + 136 (:-1)
+13  libsystem_pthread.dylib       	0x00000001f013a8cc thread_start + 8
+
+Thread 9:
+
+Thread 10:
+
+Thread 11 name:
+Thread 11:
+0   libsystem_kernel.dylib        	0x000000023fde4cd4 mach_msg2_trap + 8
+1   libsystem_kernel.dylib        	0x000000023fde830c mach_msg2_internal + 76 (:-1)
+2   libsystem_kernel.dylib        	0x000000023fde822c mach_msg2 + 4 (:-1)
+3   libsystem_kernel.dylib        	0x000000023fde822c mach_msg_overwrite + 424 (:-1)
+4   libsystem_kernel.dylib        	0x000000023fde8078 mach_msg + 24 (:-1)
+5   CoreFoundation                	0x00000001907e0344 __CFRunLoopServiceMachPort + 160 (:-1)
+6   CoreFoundation                	0x00000001907aa310 __CFRunLoopRun + 1188 (:-1)
+7   CoreFoundation                	0x00000001907a954c _CFRunLoopRunSpecificWithOptions + 532 (:-1)
+8   Flutter                       	0x0000000104247ed8 fml::MessageLoopDarwin::Run() + 92 (message_loop_darwin.mm:51)
+9   Flutter                       	0x0000000104247530 fml::MessageLoopImpl::DoRun() + 16 (function.h:319)
+10  Flutter                       	0x0000000104247530 fml::MessageLoop::Run() + 16
+11  Flutter                       	0x0000000104247530 fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0::operator()() const + 16
+12  Flutter                       	0x0000000104247530 decltype(std::declval<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0&>()()) std::__fl::__invoke[abi:nn210000]<fml::T... + 16
+13  Flutter                       	0x0000000104247530 void std::__fl::__invoke_void_return_wrapper<void, true>::__call[abi:nn210000]<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig con... + 16
+14  Flutter                       	0x0000000104247530 void std::__fl::__invoke_r[abi:nn210000]<void, fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0&>(fml::Thread::Thread(... + 16
+15  Flutter                       	0x0000000104247530 std::__fl::__function::__alloc_func<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0, std::__fl::allocator<fml::Thread... + 16
+16  Flutter                       	0x0000000104247530 std::__fl::__function::__func<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0, std::__fl::allocator<fml::Thread::Thre... + 196
+17  Flutter                       	0x00000001042471bc std::__fl::__function::__value_func<void ()>::operator()[abi:nn210000]() const + 20 (thread.cc:73)
+18  Flutter                       	0x00000001042471bc std::__fl::function<void ()>::operator()() const + 20
+19  Flutter                       	0x00000001042471bc fml::ThreadHandle::ThreadHandle(std::__fl::function<void ()>&&)::$_0::operator()(void*) const + 20
+20  Flutter                       	0x00000001042471bc fml::ThreadHandle::ThreadHandle(std::__fl::function<void ()>&&)::$_0::__invoke(void*) + 36
+21  libsystem_pthread.dylib       	0x00000001f013e438 _pthread_start + 136 (:-1)
+22  libsystem_pthread.dylib       	0x00000001f013a8cc thread_start + 8
+
+Thread 12 name:
+Thread 12:
+0   libsystem_kernel.dylib        	0x000000023fde4cd4 mach_msg2_trap + 8
+1   libsystem_kernel.dylib        	0x000000023fde830c mach_msg2_internal + 76 (:-1)
+2   libsystem_kernel.dylib        	0x000000023fde822c mach_msg2 + 4 (:-1)
+3   libsystem_kernel.dylib        	0x000000023fde822c mach_msg_overwrite + 424 (:-1)
+4   libsystem_kernel.dylib        	0x000000023fde8078 mach_msg + 24 (:-1)
+5   CoreFoundation                	0x00000001907e0344 __CFRunLoopServiceMachPort + 160 (:-1)
+6   CoreFoundation                	0x00000001907aa310 __CFRunLoopRun + 1188 (:-1)
+7   CoreFoundation                	0x00000001907a954c _CFRunLoopRunSpecificWithOptions + 532 (:-1)
+8   Flutter                       	0x0000000104247ed8 fml::MessageLoopDarwin::Run() + 92 (message_loop_darwin.mm:51)
+9   Flutter                       	0x0000000104247530 fml::MessageLoopImpl::DoRun() + 16 (function.h:319)
+10  Flutter                       	0x0000000104247530 fml::MessageLoop::Run() + 16
+11  Flutter                       	0x0000000104247530 fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0::operator()() const + 16
+12  Flutter                       	0x0000000104247530 decltype(std::declval<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0&>()()) std::__fl::__invoke[abi:nn210000]<fml::T... + 16
+13  Flutter                       	0x0000000104247530 void std::__fl::__invoke_void_return_wrapper<void, true>::__call[abi:nn210000]<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig con... + 16
+14  Flutter                       	0x0000000104247530 void std::__fl::__invoke_r[abi:nn210000]<void, fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0&>(fml::Thread::Thread(... + 16
+15  Flutter                       	0x0000000104247530 std::__fl::__function::__alloc_func<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0, std::__fl::allocator<fml::Thread... + 16
+16  Flutter                       	0x0000000104247530 std::__fl::__function::__func<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0, std::__fl::allocator<fml::Thread::Thre... + 196
+17  Flutter                       	0x00000001042471bc std::__fl::__function::__value_func<void ()>::operator()[abi:nn210000]() const + 20 (thread.cc:73)
+18  Flutter                       	0x00000001042471bc std::__fl::function<void ()>::operator()() const + 20
+19  Flutter                       	0x00000001042471bc fml::ThreadHandle::ThreadHandle(std::__fl::function<void ()>&&)::$_0::operator()(void*) const + 20
+20  Flutter                       	0x00000001042471bc fml::ThreadHandle::ThreadHandle(std::__fl::function<void ()>&&)::$_0::__invoke(void*) + 36
+21  libsystem_pthread.dylib       	0x00000001f013e438 _pthread_start + 136 (:-1)
+22  libsystem_pthread.dylib       	0x00000001f013a8cc thread_start + 8
+
+Thread 13 name:
+Thread 13:
+0   libsystem_kernel.dylib        	0x000000023fdea5e8 __psynch_cvwait + 8
+1   libsystem_pthread.dylib       	0x00000001f013cb48 _pthread_psynch_cond_wait + 92 (:-1)
+2   libsystem_pthread.dylib       	0x00000001f013cb48 _pthread_cond_wait + 980 (:-1)
+3   Flutter                       	0x0000000104240f40 std::__fl::__libcpp_condvar_wait[abi:nn210000](_opaque_pthread_cond_t*, _opaque_pthread_mutex_t*) + 12 (thread.h:209)
+4   Flutter                       	0x0000000104240f40 std::__fl::condition_variable::wait(std::__fl::unique_lock<std::__fl::mutex>&) + 12
+5   Flutter                       	0x0000000104240f40 void std::__fl::condition_variable::wait<fml::ConcurrentMessageLoop::WorkerMain()::$_0>(std::__fl::unique_lock<std::__fl::mutex>&, fml::ConcurrentMessageLoop::WorkerMain()::$_0) + 48
+6   Flutter                       	0x0000000104240f40 fml::ConcurrentMessageLoop::WorkerMain() + 56
+7   Flutter                       	0x0000000104240f40 fml::ConcurrentMessageLoop::ConcurrentMessageLoop(unsigned long)::$_0::operator()() const + 228
+8   Flutter                       	0x0000000104240f40 decltype(std::declval<fml::ConcurrentMessageLoop::ConcurrentMessageLoop(unsigned long)::$_0>()()) std::__fl::__invoke[abi:nn210000]<fml::ConcurrentMessageLoop::ConcurrentMessageLoop(unsigned long):... + 228
+9   Flutter                       	0x0000000104240f40 void std::__fl::__thread_execute[abi:nn210000]<std::__fl::unique_ptr<std::__fl::__thread_struct, std::__fl::default_delete<std::__fl::__thread_struct>>, fml::ConcurrentMessageLoop::ConcurrentMessag... + 228
+10  Flutter                       	0x0000000104240f40 void* std::__fl::__thread_proxy[abi:nn210000]<std::__fl::tuple<std::__fl::unique_ptr<std::__fl::__thread_struct, std::__fl::default_delete<std::__fl::__thread_struct>>, fml::ConcurrentMessageLoop::... + 324
+11  libsystem_pthread.dylib       	0x00000001f013e438 _pthread_start + 136 (:-1)
+12  libsystem_pthread.dylib       	0x00000001f013a8cc thread_start + 8
+
+Thread 14 name:
+Thread 14:
+0   libsystem_kernel.dylib        	0x000000023fdea5e8 __psynch_cvwait + 8
+1   libsystem_pthread.dylib       	0x00000001f013cb48 _pthread_psynch_cond_wait + 92 (:-1)
+2   libsystem_pthread.dylib       	0x00000001f013cb48 _pthread_cond_wait + 980 (:-1)
+3   Flutter                       	0x0000000104240f40 std::__fl::__libcpp_condvar_wait[abi:nn210000](_opaque_pthread_cond_t*, _opaque_pthread_mutex_t*) + 12 (thread.h:209)
+4   Flutter                       	0x0000000104240f40 std::__fl::condition_variable::wait(std::__fl::unique_lock<std::__fl::mutex>&) + 12
+5   Flutter                       	0x0000000104240f40 void std::__fl::condition_variable::wait<fml::ConcurrentMessageLoop::WorkerMain()::$_0>(std::__fl::unique_lock<std::__fl::mutex>&, fml::ConcurrentMessageLoop::WorkerMain()::$_0) + 48
+6   Flutter                       	0x0000000104240f40 fml::ConcurrentMessageLoop::WorkerMain() + 56
+7   Flutter                       	0x0000000104240f40 fml::ConcurrentMessageLoop::ConcurrentMessageLoop(unsigned long)::$_0::operator()() const + 228
+8   Flutter                       	0x0000000104240f40 decltype(std::declval<fml::ConcurrentMessageLoop::ConcurrentMessageLoop(unsigned long)::$_0>()()) std::__fl::__invoke[abi:nn210000]<fml::ConcurrentMessageLoop::ConcurrentMessageLoop(unsigned long):... + 228
+9   Flutter                       	0x0000000104240f40 void std::__fl::__thread_execute[abi:nn210000]<std::__fl::unique_ptr<std::__fl::__thread_struct, std::__fl::default_delete<std::__fl::__thread_struct>>, fml::ConcurrentMessageLoop::ConcurrentMessag... + 228
+10  Flutter                       	0x0000000104240f40 void* std::__fl::__thread_proxy[abi:nn210000]<std::__fl::tuple<std::__fl::unique_ptr<std::__fl::__thread_struct, std::__fl::default_delete<std::__fl::__thread_struct>>, fml::ConcurrentMessageLoop::... + 324
+11  libsystem_pthread.dylib       	0x00000001f013e438 _pthread_start + 136 (:-1)
+12  libsystem_pthread.dylib       	0x00000001f013a8cc thread_start + 8
+
+Thread 15 name:
+Thread 15:
+0   libsystem_kernel.dylib        	0x000000023fdea5e8 __psynch_cvwait + 8
+1   libsystem_pthread.dylib       	0x00000001f013cb48 _pthread_psynch_cond_wait + 92 (:-1)
+2   libsystem_pthread.dylib       	0x00000001f013cb48 _pthread_cond_wait + 980 (:-1)
+3   Flutter                       	0x0000000104240f40 std::__fl::__libcpp_condvar_wait[abi:nn210000](_opaque_pthread_cond_t*, _opaque_pthread_mutex_t*) + 12 (thread.h:209)
+4   Flutter                       	0x0000000104240f40 std::__fl::condition_variable::wait(std::__fl::unique_lock<std::__fl::mutex>&) + 12
+5   Flutter                       	0x0000000104240f40 void std::__fl::condition_variable::wait<fml::ConcurrentMessageLoop::WorkerMain()::$_0>(std::__fl::unique_lock<std::__fl::mutex>&, fml::ConcurrentMessageLoop::WorkerMain()::$_0) + 48
+6   Flutter                       	0x0000000104240f40 fml::ConcurrentMessageLoop::WorkerMain() + 56
+7   Flutter                       	0x0000000104240f40 fml::ConcurrentMessageLoop::ConcurrentMessageLoop(unsigned long)::$_0::operator()() const + 228
+8   Flutter                       	0x0000000104240f40 decltype(std::declval<fml::ConcurrentMessageLoop::ConcurrentMessageLoop(unsigned long)::$_0>()()) std::__fl::__invoke[abi:nn210000]<fml::ConcurrentMessageLoop::ConcurrentMessageLoop(unsigned long):... + 228
+9   Flutter                       	0x0000000104240f40 void std::__fl::__thread_execute[abi:nn210000]<std::__fl::unique_ptr<std::__fl::__thread_struct, std::__fl::default_delete<std::__fl::__thread_struct>>, fml::ConcurrentMessageLoop::ConcurrentMessag... + 228
+10  Flutter                       	0x0000000104240f40 void* std::__fl::__thread_proxy[abi:nn210000]<std::__fl::tuple<std::__fl::unique_ptr<std::__fl::__thread_struct, std::__fl::default_delete<std::__fl::__thread_struct>>, fml::ConcurrentMessageLoop::... + 324
+11  libsystem_pthread.dylib       	0x00000001f013e438 _pthread_start + 136 (:-1)
+12  libsystem_pthread.dylib       	0x00000001f013a8cc thread_start + 8
+
+Thread 16 name:
+Thread 16:
+0   libsystem_kernel.dylib        	0x000000023fdeb8dc kevent + 8
+1   Flutter                       	0x00000001046774c4 dart::bin::EventHandlerImplementation::EventHandlerEntry(unsigned long) + 368 (eventhandler_macos.cc:459)
+2   Flutter                       	0x00000001046af1f8 dart::bin::ThreadStart(void*) + 88 (thread_macos.cc:65)
+3   libsystem_pthread.dylib       	0x00000001f013e438 _pthread_start + 136 (:-1)
+4   libsystem_pthread.dylib       	0x00000001f013a8cc thread_start + 8
+
+Thread 17 name:
+Thread 17:
+0   libsystem_kernel.dylib        	0x000000023fdea5e8 __psynch_cvwait + 8
+1   libsystem_pthread.dylib       	0x00000001f013cb74 _pthread_psynch_cond_wait + 136 (:-1)
+2   libsystem_pthread.dylib       	0x00000001f013cb74 _pthread_cond_wait + 1024 (:-1)
+3   Flutter                       	0x00000001046fb02c dart::TimedWait(_opaque_pthread_cond_t*, _opaque_pthread_mutex_t*, long long) + 60 (synchronization_posix.cc:147)
+4   Flutter                       	0x00000001046fb02c dart::ConditionVariable::WaitMicros(dart::Mutex*, long long) + 116
+5   Flutter                       	0x00000001047bd2ac dart::ThreadPool::Worker::Sleep(long long) + 16 (thread_pool.cc:367)
+6   Flutter                       	0x00000001047bd2ac dart::ThreadPool::WorkerLoop(dart::ThreadPool::Worker*) + 472
+7   Flutter                       	0x00000001047bd2ac dart::ThreadPool::Worker::Main(unsigned long) + 712
+8   Flutter                       	0x000000010479ab84 dart::ThreadStart(void*) + 272 (os_thread_macos.cc:94)
+9   libsystem_pthread.dylib       	0x00000001f013e438 _pthread_start + 136 (:-1)
+10  libsystem_pthread.dylib       	0x00000001f013a8cc thread_start + 8
+
+Thread 18 name:
+Thread 18:
+0   libsystem_kernel.dylib        	0x000000023fdea5e8 __psynch_cvwait + 8
+1   libsystem_pthread.dylib       	0x00000001f013cb74 _pthread_psynch_cond_wait + 136 (:-1)
+2   libsystem_pthread.dylib       	0x00000001f013cb74 _pthread_cond_wait + 1024 (:-1)
+3   Flutter                       	0x00000001046fb02c dart::TimedWait(_opaque_pthread_cond_t*, _opaque_pthread_mutex_t*, long long) + 60 (synchronization_posix.cc:147)
+4   Flutter                       	0x00000001046fb02c dart::ConditionVariable::WaitMicros(dart::Mutex*, long long) + 116
+5   Flutter                       	0x00000001047bd2ac dart::ThreadPool::Worker::Sleep(long long) + 16 (thread_pool.cc:367)
+6   Flutter                       	0x00000001047bd2ac dart::ThreadPool::WorkerLoop(dart::ThreadPool::Worker*) + 472
+7   Flutter                       	0x00000001047bd2ac dart::ThreadPool::Worker::Main(unsigned long) + 712
+8   Flutter                       	0x000000010479ab84 dart::ThreadStart(void*) + 272 (os_thread_macos.cc:94)
+9   libsystem_pthread.dylib       	0x00000001f013e438 _pthread_start + 136 (:-1)
+10  libsystem_pthread.dylib       	0x00000001f013a8cc thread_start + 8
+
+Thread 19 name:
+Thread 19:
+0   libsystem_kernel.dylib        	0x000000023fdea5e8 __psynch_cvwait + 8
+1   libsystem_pthread.dylib       	0x00000001f013cb74 _pthread_psynch_cond_wait + 136 (:-1)
+2   libsystem_pthread.dylib       	0x00000001f013cb74 _pthread_cond_wait + 1024 (:-1)
+3   Flutter                       	0x00000001046fb02c dart::TimedWait(_opaque_pthread_cond_t*, _opaque_pthread_mutex_t*, long long) + 60 (synchronization_posix.cc:147)
+4   Flutter                       	0x00000001046fb02c dart::ConditionVariable::WaitMicros(dart::Mutex*, long long) + 116
+5   Flutter                       	0x00000001047bd2ac dart::ThreadPool::Worker::Sleep(long long) + 16 (thread_pool.cc:367)
+6   Flutter                       	0x00000001047bd2ac dart::ThreadPool::WorkerLoop(dart::ThreadPool::Worker*) + 472
+7   Flutter                       	0x00000001047bd2ac dart::ThreadPool::Worker::Main(unsigned long) + 712
+8   Flutter                       	0x000000010479ab84 dart::ThreadStart(void*) + 272 (os_thread_macos.cc:94)
+9   libsystem_pthread.dylib       	0x00000001f013e438 _pthread_start + 136 (:-1)
+10  libsystem_pthread.dylib       	0x00000001f013a8cc thread_start + 8
+
+Thread 20 name:
+Thread 20:
+0   libsystem_kernel.dylib        	0x000000023fdea5e8 __psynch_cvwait + 8
+1   libsystem_pthread.dylib       	0x00000001f013cb74 _pthread_psynch_cond_wait + 136 (:-1)
+2   libsystem_pthread.dylib       	0x00000001f013cb74 _pthread_cond_wait + 1024 (:-1)
+3   Flutter                       	0x00000001046fb02c dart::TimedWait(_opaque_pthread_cond_t*, _opaque_pthread_mutex_t*, long long) + 60 (synchronization_posix.cc:147)
+4   Flutter                       	0x00000001046fb02c dart::ConditionVariable::WaitMicros(dart::Mutex*, long long) + 116
+5   Flutter                       	0x00000001047bd2ac dart::ThreadPool::Worker::Sleep(long long) + 16 (thread_pool.cc:367)
+6   Flutter                       	0x00000001047bd2ac dart::ThreadPool::WorkerLoop(dart::ThreadPool::Worker*) + 472
+7   Flutter                       	0x00000001047bd2ac dart::ThreadPool::Worker::Main(unsigned long) + 712
+8   Flutter                       	0x000000010479ab84 dart::ThreadStart(void*) + 272 (os_thread_macos.cc:94)
+9   libsystem_pthread.dylib       	0x00000001f013e438 _pthread_start + 136 (:-1)
+10  libsystem_pthread.dylib       	0x00000001f013a8cc thread_start + 8
+
+Thread 21 name:
+Thread 21:
+0   libsystem_kernel.dylib        	0x000000023fdea5e8 __psynch_cvwait + 8
+1   libsystem_pthread.dylib       	0x00000001f013cb74 _pthread_psynch_cond_wait + 136 (:-1)
+2   libsystem_pthread.dylib       	0x00000001f013cb74 _pthread_cond_wait + 1024 (:-1)
+3   Flutter                       	0x00000001046fb02c dart::TimedWait(_opaque_pthread_cond_t*, _opaque_pthread_mutex_t*, long long) + 60 (synchronization_posix.cc:147)
+4   Flutter                       	0x00000001046fb02c dart::ConditionVariable::WaitMicros(dart::Mutex*, long long) + 116
+5   Flutter                       	0x00000001047bd2ac dart::ThreadPool::Worker::Sleep(long long) + 16 (thread_pool.cc:367)
+6   Flutter                       	0x00000001047bd2ac dart::ThreadPool::WorkerLoop(dart::ThreadPool::Worker*) + 472
+7   Flutter                       	0x00000001047bd2ac dart::ThreadPool::Worker::Main(unsigned long) + 712
+8   Flutter                       	0x000000010479ab84 dart::ThreadStart(void*) + 272 (os_thread_macos.cc:94)
+9   libsystem_pthread.dylib       	0x00000001f013e438 _pthread_start + 136 (:-1)
+10  libsystem_pthread.dylib       	0x00000001f013a8cc thread_start + 8
+
+Thread 22 name:
+Thread 22:
+0   libsystem_kernel.dylib        	0x000000023fdea5e8 __psynch_cvwait + 8
+1   libsystem_pthread.dylib       	0x00000001f013cb74 _pthread_psynch_cond_wait + 136 (:-1)
+2   libsystem_pthread.dylib       	0x00000001f013cb74 _pthread_cond_wait + 1024 (:-1)
+3   Flutter                       	0x00000001046fb02c dart::TimedWait(_opaque_pthread_cond_t*, _opaque_pthread_mutex_t*, long long) + 60 (synchronization_posix.cc:147)
+4   Flutter                       	0x00000001046fb02c dart::ConditionVariable::WaitMicros(dart::Mutex*, long long) + 116
+5   Flutter                       	0x00000001047bd2ac dart::ThreadPool::Worker::Sleep(long long) + 16 (thread_pool.cc:367)
+6   Flutter                       	0x00000001047bd2ac dart::ThreadPool::WorkerLoop(dart::ThreadPool::Worker*) + 472
+7   Flutter                       	0x00000001047bd2ac dart::ThreadPool::Worker::Main(unsigned long) + 712
+8   Flutter                       	0x000000010479ab84 dart::ThreadStart(void*) + 272 (os_thread_macos.cc:94)
+9   libsystem_pthread.dylib       	0x00000001f013e438 _pthread_start + 136 (:-1)
+10  libsystem_pthread.dylib       	0x00000001f013a8cc thread_start + 8
+
+
+Thread 0 crashed with ARM Thread State (64-bit):
+    x0: 0x0000000000000000   x1: 0x0000000000000000   x2: 0x0000000000000000   x3: 0x0000000000000000
+    x4: 0x000000018d46dcd3   x5: 0x000000016d588f60   x6: 0x000000000000006e   x7: 0xfffff0003ffff800
+    x8: 0x9f4e770407279cb3   x9: 0x9f4e7705fed2fd73  x10: 0x0000000000000002  x11: 0x00000000fffffffd
+   x12: 0x0000000000000000  x13: 0x0000000000000000  x14: 0x0000000000000000  x15: 0x0000000000000000
+   x16: 0x0000000000000148  x17: 0x00000001f9f561c0  x18: 0x0000000000000000  x19: 0x0000000000000006
+   x20: 0x0000000000000103  x21: 0x00000001f9f562a0  x22: 0x00000001f6ebc000  x23: 0x000000011e7932c0
+   x24: 0x000000011e489500  x25: 0x0000000207a54280  x26: 0x0000000000000000  x27: 0x0000000103d59a10
+   x28: 0x000000010496acbb   fp: 0x000000016d588ed0   lr: 0x00000001f01417dc
+    sp: 0x000000016d588eb0   pc: 0x000000023fdef1d0 cpsr: 0x40001000
+   esr: 0x56000080 (Syscall)
+
+
+Binary Images:
+        0x102874000 -         0x10320bfff Runner arm64  <a7c66b658bd33bb1a6873c75a9177328> /private/var/containers/Bundle/Application/2232B111-9F6F-4CA9-8552-88410994C7C7/Runner.app/Runner
+        0x103598000 -         0x1035a3fff libobjc-trampolines.dylib arm64e  <6893bf2adb4b33d9875deea7cb8f8060> /private/preboot/Cryptexes/OS/usr/lib/libobjc-trampolines.dylib
+        0x10360c000 -         0x103623fff GAXClient arm64e  <304ecf0ef3443889a5708b3c21d2c12e> /System/Library/AccessibilityBundles/GAXClient.bundle/GAXClient
+        0x10369c000 -         0x1036a3fff open_filex arm64  <a35caacafeac3216aa7bcfc7571c1058> /private/var/containers/Bundle/Application/2232B111-9F6F-4CA9-8552-88410994C7C7/Runner.app/Frameworks/open_filex.framework/open_filex
+        0x1036b4000 -         0x1036c3fff flutter_background_service_ios arm64  <bd3d3a53752d357ba66d52a261a533d6> /private/var/containers/Bundle/Application/2232B111-9F6F-4CA9-8552-88410994C7C7/Runner.app/Frameworks/flutter_background_service_ios.framework/flutter_background_service_ios
+        0x1037a4000 -         0x1037b3fff flutter_local_notifications arm64  <41bfc923e0eb3303ac78c79e74cffa37> /private/var/containers/Bundle/Application/2232B111-9F6F-4CA9-8552-88410994C7C7/Runner.app/Frameworks/flutter_local_notifications.framework/flutter_local_notifications
+        0x103844000 -         0x103853fff flutter_secure_storage arm64  <5fbadeb42d753e1da5ee9fc1a959b4a6> /private/var/containers/Bundle/Application/2232B111-9F6F-4CA9-8552-88410994C7C7/Runner.app/Frameworks/flutter_secure_storage.framework/flutter_secure_storage
+        0x104198000 -         0x1049e7fff Flutter arm64  <4c4c440655553144a11ddffb6b5e42cd> /private/var/containers/Bundle/Application/2232B111-9F6F-4CA9-8552-88410994C7C7/Runner.app/Frameworks/Flutter.framework/Flutter
+        0x107cf0000 -         0x108977fff App arm64  <fd533eb98c2859dc441225b89f1f4678> /private/var/containers/Bundle/Application/2232B111-9F6F-4CA9-8552-88410994C7C7/Runner.app/Frameworks/App.framework/App
+        0x18d32c000 -         0x18d37d47f libobjc.A.dylib arm64e  <a4d0da7a2f8f3d269953218851547bfc> /usr/lib/libobjc.A.dylib
+        0x18d3b1000 -         0x18d45647f dyld arm64e  <0ba28ce287183cb3bef46dd44464ebe2> /usr/lib/dyld
+        0x18d457000 -         0x18d47159f libc++abi.dylib arm64e  <10fb000e5edb3a04996bbe734107cf07> /usr/lib/libc++abi.dylib
+        0x18da0c000 -         0x18e895c1f Foundation arm64e  <1689fea517803efe8f31933d4db24ec4> /System/Library/Frameworks/Foundation.framework/Foundation
+        0x19077b000 -         0x190d179bf CoreFoundation arm64e  <5565cad9494132ac8b107d3233c74151> /System/Library/Frameworks/CoreFoundation.framework/CoreFoundation
+        0x1963bc000 -         0x1988ff63f UIKitCore arm64e  <26334227f5583da7985d326a0c894dd4> /System/Library/PrivateFrameworks/UIKitCore.framework/UIKitCore
+        0x19c2f8000 -         0x19c3775ff libsystem_c.dylib arm64e  <ca7f1aef8c1f33a2b1cc52d9ab644bea> /usr/lib/system/libsystem_c.dylib
+        0x1cb2b8000 -         0x1cb2fe5ff libdispatch.dylib arm64e  <955b1789d5423497b46dbd6be85f91a2> /usr/lib/system/libdispatch.dylib
+        0x1f013a000 -         0x1f01464ef libsystem_pthread.dylib arm64e  <46b95807f7523dc2a1ba6290e8d7fe38> /usr/lib/system/libsystem_pthread.dylib
+        0x236774000 -         0x23677c7bf GraphicsServices arm64e  <7915658c77283149a5242164c163f3d2> /System/Library/PrivateFrameworks/GraphicsServices.framework/GraphicsServices
+        0x23fde4000 -         0x23fe1fb1f libsystem_kernel.dylib arm64e  <a11bf43317ab3f0188bc54c467ce6287> /usr/lib/system/libsystem_kernel.dylib
+
+EOF
