@@ -37,7 +37,3 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
-        beta_build_localizations:
-          - locale: en-US
-            whats_new: Bug fixes and performance improvements.
-            feedback_email: support@hitechpragati.com
