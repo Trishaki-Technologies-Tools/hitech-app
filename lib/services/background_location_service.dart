@@ -94,11 +94,30 @@ class BackgroundLocationService {
           });
         } catch (_) {}
 
-        positionStream = Geolocator.getPositionStream(
-          locationSettings: const LocationSettings(
+        late final LocationSettings locationSettings;
+        if (Platform.isIOS) {
+          locationSettings = AppleLocationSettings(
             accuracy: LocationAccuracy.high,
-            distanceFilter: 20, // Only trigger if moved 20 meters
-          ),
+            distanceFilter: 20,
+            pauseLocationUpdatesAutomatically: false,
+            showBackgroundLocationIndicator: true,
+            allowBackgroundLocationUpdates: true,
+          );
+        } else if (Platform.isAndroid) {
+          locationSettings = AndroidSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 20,
+            intervalDuration: const Duration(seconds: 10),
+          );
+        } else {
+          locationSettings = const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 20,
+          );
+        }
+
+        positionStream = Geolocator.getPositionStream(
+          locationSettings: locationSettings,
         ).listen((Position position) async {
           if (position.accuracy > 300) return; // Ignore wildly inaccurate GPS data
 
