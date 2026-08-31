@@ -27,7 +27,7 @@ workflows:
         script: |
           flutter build ipa --release \
             --build-name=1.0.3 \
-            --build-number=9 \
+            --build-number=10 \
             --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
@@ -37,3 +37,7 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
+        beta_build_localizations:
+          - locale: en-US
+            whats_new: Bug fixes and performance improvements.
+            feedback_email: support@hitechpragati.com

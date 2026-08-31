@@ -84,11 +84,10 @@ class _TLDashboardState extends State<TLDashboard> {
 
     final breakProvider = Provider.of<BreakProvider>(context, listen: false);
 
-    bool hasNotification = await Permission.notification.isGranted;
     LocationPermission permission = await Geolocator.checkPermission();
     bool hasLocation = permission == LocationPermission.always || permission == LocationPermission.whileInUse;
 
-    if (hasNotification && hasLocation) {
+    if (hasLocation) {
       bool isServiceRunning = await FlutterBackgroundService().isRunning();
       
       String? isFreshLogin = await storage.read(key: 'is_fresh_login');
@@ -169,9 +168,11 @@ class _TLDashboardState extends State<TLDashboard> {
           return;
         }
 
-        if (await Permission.notification.status != PermissionStatus.granted) {
-          await Permission.notification.request();
-        }
+        try {
+          if (await Permission.notification.status != PermissionStatus.granted) {
+            await Permission.notification.request();
+          }
+        } catch (_) {}
         
         LocationPermission permission = await Geolocator.checkPermission();
         if (permission == LocationPermission.denied) {
@@ -183,10 +184,9 @@ class _TLDashboardState extends State<TLDashboard> {
           }
         }
 
-        bool hasNotification = await Permission.notification.isGranted;
         bool hasLocation = permission == LocationPermission.always || permission == LocationPermission.whileInUse;
 
-        if (hasNotification && hasLocation) {
+        if (hasLocation) {
           // Fire and forget to make UI instantly responsive
           _locationService.markAttendance('login');
           breakProvider.stopBreak();

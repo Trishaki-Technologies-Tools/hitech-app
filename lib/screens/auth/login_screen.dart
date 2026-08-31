@@ -44,6 +44,11 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+      if (mounted) setState(() { _isCheckingPermissions = false; _permissionsGranted = true; });
+      return;
+    }
+
     if (permission == LocationPermission.denied) {
       if (mounted) {
         bool accepted = await LocationDisclosureDialog.show(context);
@@ -53,10 +58,10 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     }
 
-    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-      if (mounted) setState(() { _isCheckingPermissions = false; _permissionsGranted = false; });
-    } else {
+    if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
       if (mounted) setState(() { _isCheckingPermissions = false; _permissionsGranted = true; });
+    } else {
+      if (mounted) setState(() { _isCheckingPermissions = false; _permissionsGranted = false; });
     }
   }
 
