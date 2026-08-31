@@ -96,7 +96,7 @@ class BackgroundLocationService {
 
         late final LocationSettings locationSettings;
         if (Platform.isIOS) {
-          locationSettings = AppleLocationSettings(
+          locationSettings = AppleSettings(
             accuracy: LocationAccuracy.high,
             distanceFilter: 20,
             pauseLocationUpdatesAutomatically: false,
